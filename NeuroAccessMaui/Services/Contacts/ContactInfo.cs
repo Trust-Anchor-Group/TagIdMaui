@@ -25,6 +25,7 @@ namespace NeuroAccessMaui.Services.Contacts
 		private LegalIdentity? legalIdentity = null;
 		private Property[]? metaData = null;
 		private string friendlyName = string.Empty;
+		private string alias = string.Empty;
 		private string sourceId = string.Empty;
 		private string partition = string.Empty;
 		private string nodeId = string.Empty;
@@ -91,6 +92,16 @@ namespace NeuroAccessMaui.Services.Contacts
 		{
 			get => this.friendlyName;
 			set => this.friendlyName = value;
+		}
+
+		/// <summary>
+		/// Alias name (user set friendly name)
+		/// </summary>
+		[DefaultValueStringEmpty]
+		public string Alias
+		{
+			get => this.alias;
+			set => this.alias = value;
 		}
 
 		/// <summary>
