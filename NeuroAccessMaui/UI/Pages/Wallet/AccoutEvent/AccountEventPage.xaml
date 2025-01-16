@@ -28,27 +28,27 @@
 						<!-- Note -->
 						<Label Text="{l:Localize RemoteParty}" Style="{StaticResource SectionTitleLabel}"/>
 						<controls:CompositeEntry EntryData="{Binding Path=FriendlyName}" IsReadOnly="True"
-																 Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+																 Style="{StaticResource RegularCompositeEntry}"/>
 						<Label Text="{l:Localize Timestamp}" Style="{StaticResource SectionTitleLabel}"/>
 						<controls:CompositeEntry EntryData="{Binding Path=TimestampStr}" IsReadOnly="True"
-																 Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+																 Style="{StaticResource RegularCompositeEntry}"/>
 						<Label Text="{l:Localize Change}" Style="{StaticResource SectionTitleLabel}"/>
 						<controls:CompositeEntry EntryData="{Binding Path=ChangeAndCurrency}" IsReadOnly="True" TextColor="{Binding Path=Change, Converter={converters:AmountToColor}}"
-																 Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+																 Style="{StaticResource RegularCompositeEntry}"/>
 						<Label Text="{l:Localize Balance}" Style="{StaticResource SectionTitleLabel}"/>
 						<controls:CompositeEntry EntryData="{Binding Path=BalanceAndCurrency}" IsReadOnly="True"
-																 Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+																 Style="{StaticResource RegularCompositeEntry}"/>
 						<Label Text="{l:Localize Reserved}" IsVisible="{Binding Reserved, Converter={converters:GreaterThanZero}}" Style="{StaticResource SectionTitleLabel}"/>
 						<controls:CompositeEntry EntryData="{Binding Path=ReservedAndCurrency}" IsReadOnly="True"
 																 IsVisible="{Binding Reserved, Converter={converters:GreaterThanZero}}"
-																 Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+																 Style="{StaticResource RegularCompositeEntry}"/>
 						<Label Text="{l:Localize Message}" IsVisible="{Binding Path=HasMessage}" Style="{StaticResource SectionTitleLabel}"/>
 						<controls:CompositeEntry EntryData="{Binding Path=Message}" IsReadOnly="True" IsVisible="{Binding Path=HasMessage}"
-																 Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+																 Style="{StaticResource RegularCompositeEntry}"/>
 						<controls:TextButton LabelData="{l:Localize OpenMessageLink}" Command="{Binding OpenMessageLinkCommand}"
 													IsVisible="{Binding MessageIsUri}" Style="{StaticResource FilledTextButton}"/>
 						<Label Text="{l:Localize TransactionId}"/>
-						<controls:CompositeEntry EntryData="{Binding Path=Id}" IsReadOnly="True" Style="{StaticResource RegularCompositeEntryNoRoundedCorners}"/>
+						<controls:CompositeEntry EntryData="{Binding Path=Id}" IsReadOnly="True" Style="{StaticResource RegularCompositeEntry}"/>
 					</VerticalStackLayout>
 				</Frame>
 			</VerticalStackLayout>
