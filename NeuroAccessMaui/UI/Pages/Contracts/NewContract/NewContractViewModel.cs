@@ -205,8 +205,10 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 							|| p.Parameter is DateParameter
 							|| p.Parameter is DateTimeParameter
 							|| p.Parameter is TimeParameter
-							|| p.Parameter is DurationParameter)
+							|| p.Parameter is DurationParameter
+							|| p.Parameter is ContractReferenceParameter)
 						{
+							Console.WriteLine("Adding parameter: +" + p.Parameter.GetType().Name);
 							this.EditableParameters.Add(p);
 						}
 					}

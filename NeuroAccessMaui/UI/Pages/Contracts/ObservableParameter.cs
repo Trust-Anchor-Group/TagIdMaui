@@ -6,6 +6,9 @@ using Waher.Content;
 using Waher.Networking.XMPP.Contracts;
 using System.Globalization;
 using System.Text;
+using CommunityToolkit.Mvvm.Input;
+using NeuroAccessMaui.UI.Pages.Contracts.MyContracts;
+using System.Xml;
 
 namespace NeuroAccessMaui.UI.Pages.Contracts.ObjectModel
 {
@@ -58,6 +61,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.ObjectModel
 				DurationParameter durationParameter => new ObservableDurationParameter(durationParameter),
 				RoleParameter roleParameter => new ObservableRoleParameter(roleParameter),
 				CalcParameter calcParameter => new ObservableCalcParameter(calcParameter),
+				ContractReferenceParameter contractReferenceParameter => new ObservableContractReferenceParameter(contractReferenceParameter),
 				_ => new ObservableParameter(parameter)
 			};
 
@@ -396,6 +400,42 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.ObjectModel
 				this.DateTimeValue = current.Date + value;
 			}
 		}
+	}
+
+	public partial class ObservableContractReferenceParameter : ObservableParameter
+	{
+		public ObservableContractReferenceParameter(ContractReferenceParameter parameter) : base(parameter)
+		{
+			this.Value = parameter.ObjectValue as string ?? string.Empty;
+		}
+
+		public string? ContractReferenceValue
+		{
+			get => this.Value as string ?? string.Empty;
+			set => this.Value = value;
+		}
+
+		[RelayCommand]
+		private async Task PickContractReferenceAsync()
+		{
+			try
+			{
+				TaskCompletionSource<Contract?> taskCompletionSource = new TaskCompletionSource<Contract?>();
+				MyContractsNavigationArgs args = new MyContractsNavigationArgs(ContractsListMode.Contracts, taskCompletionSource);
+				await ServiceRef.UiService.GoToAsync(nameof(MyContractsPage), args);
+				Contract? contract = await taskCompletionSource.Task;
+				Console.WriteLine("Contract selected: " + contract?.ContractId ?? String.Empty);
+
+				this.ContractReferenceValue = contract?.ContractId;
+			}
+			catch (Exception e)
+			{
+				ServiceRef.LogService.LogException(e);
+			}
+
+			// Open a dialog to pick a contract reference
+			// and set the value of the parameter
+		} 
 	}
 
 }

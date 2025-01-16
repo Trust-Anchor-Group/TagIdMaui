@@ -414,4 +414,20 @@
 		</VerticalStackLayout>
 	</DataTemplate>
 
+
+	<DataTemplate x:Key="ContractReferenceParameterTemplate"
+					  x:DataType="objectModel:ObservableContractReferenceParameter">
+		<VerticalStackLayout Spacing="{StaticResource SmallSpacing}">
+			<controls:CompositeEntry Style="{StaticResource RegularCompositeEntry}"
+											 EntryData="{Binding ContractReferenceValue, Mode=TwoWay}"
+											 Placeholder="{Binding Guide}"
+											 VerticalOptions="Center"
+											 LabelText="{Binding Label}"
+											 IsValid="{Binding IsValid}" />
+			<controls:TextButton LabelData="TEST" Command="{Binding PickContractReferenceCommand}" Style="{StaticResource FilledTextButton}" />
+			<controls:ParameterProtectionIndicator IsTransient="{Binding IsTransient}"
+																IsEncrypted="{Binding IsEncrypted}"
+																IsVisible="{Binding IsProtected}" />
+		</VerticalStackLayout>
+	</DataTemplate>
 </ResourceDictionary>
