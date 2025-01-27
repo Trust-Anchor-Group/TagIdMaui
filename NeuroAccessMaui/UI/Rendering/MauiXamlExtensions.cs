@@ -28,11 +28,11 @@ namespace NeuroAccessMaui.UI.Rendering
 		/// </summary>
 		/// <param name="Document">Markdown document.</param>
 		/// <returns>VerticalStackLayout</returns>
-		public static Task<VerticalStackLayout?> GenerateMaui(this MarkdownDocument Document)
+		public static async Task<VerticalStackLayout?> GenerateMaui(this MarkdownDocument Document)
 		{
 			using MauiRenderer Renderer = new(Document);
-			Document.RenderDocument(Renderer);
-			return Task.FromResult(Renderer.Output());
+			await Document.RenderDocument(Renderer);
+			return Renderer.Output();
 		}
 
 		/// <summary>
