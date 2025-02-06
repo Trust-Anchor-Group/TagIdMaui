@@ -604,7 +604,7 @@ namespace NeuroAccessMaui.Services.Contracts
 							CreationAttributesEventArgs creationAttr = await ServiceRef.XmppService.GetNeuroFeatureCreationAttributes();
 							ServiceRef.TagProfile.TrustProviderId = creationAttr.TrustProviderId;
 							ParameterValues ??= [];
-							ParameterValues.Add(new CaseInsensitiveString("TrustProvider"), creationAttr.TrustProviderId);
+							ParameterValues.TryAdd(new CaseInsensitiveString("TrustProvider"), creationAttr.TrustProviderId);
 						}
 
 						NewContractNavigationArgs e = new(Contract, ParameterValues);
