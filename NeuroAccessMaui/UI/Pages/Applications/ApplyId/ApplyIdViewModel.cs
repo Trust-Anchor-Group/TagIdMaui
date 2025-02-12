@@ -1036,27 +1036,27 @@ namespace NeuroAccessMaui.UI.Pages.Applications.ApplyId
 		{
 			try
 			{
-				FileResult? result = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions()
+				FileResult? Result = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions()
 				{
 					Title = ServiceRef.Localizer[nameof(AppResources.PickPhotoOfYourself)]
 				});
 
-				if (result is null)
+				if (Result is null)
 					return;
 
-				Stream stream = await result.OpenReadAsync();
-				byte[] inputBin = stream.ToByteArray() ?? throw new Exception("Failed to read photo stream");
+				Stream InputStream = await Result.OpenReadAsync();
+				byte[] InputBin = InputStream.ToByteArray() ?? throw new Exception("Failed to read photo stream");
 
-				TaskCompletionSource<byte[]?> tcs = new();
+				TaskCompletionSource<byte[]?> Tcs = new();
 				await ServiceRef.UiService.GoToAsync(
 					nameof(ImageCroppingPage),
-					new ImageCroppingNavigationArgs(ImageSource.FromStream(() => new MemoryStream(inputBin)), tcs)
+					new ImageCroppingNavigationArgs(ImageSource.FromStream(() => new MemoryStream(InputBin)), Tcs)
 				);
 
-				byte[] outputBin = await tcs.Task ?? throw new Exception("Failed to crop photo");
-				MemoryStream ms = new(outputBin);
+				byte[] OutputBin = await Tcs.Task ?? throw new Exception("Failed to crop photo");
+				MemoryStream OutputStream = new(OutputBin);
 
-				await this.AddPhoto(ms, result.FullPath, true);
+				await this.AddPhoto(OutputStream, Result.FullPath, true);
 			}
 			catch (Exception ex)
 			{

@@ -415,30 +415,30 @@ namespace NeuroAccessMaui.UI.Controls
 
                 // Extract the bounding box of the crop area.
                 SKRectI boundingBox = SKRectI.Round(cropRect);
-                using SKBitmap cropped = new SKBitmap(boundingBox.Width, boundingBox.Height);
-                using (SKCanvas croppedCanvas = new SKCanvas(cropped))
+                using SKBitmap Cropped = new SKBitmap(boundingBox.Width, boundingBox.Height);
+                using (SKCanvas CroppedCanvas = new SKCanvas(Cropped))
                 {
                     SKRect dst = new SKRect(0, 0, boundingBox.Width, boundingBox.Height);
-                    croppedCanvas.DrawBitmap(maskedBitmap, boundingBox, dst);
+                    CroppedCanvas.DrawBitmap(maskedBitmap, boundingBox, dst);
                 }
 
                 // Resize the cropped bitmap if needed.
-                SKBitmap finalBitmap = ResizeBitmapIfNeeded(cropped,
+                SKBitmap FinalBitmap = ResizeBitmapIfNeeded(Cropped,
                     (int)this.OutputMaxResolution.Width,
                     (int)this.OutputMaxResolution.Height);
 
                 // Encode the final bitmap to the specified format.
-                using MemoryStream ms = new MemoryStream();
+                using MemoryStream EncodingStream = new MemoryStream();
                 if (this.OutputFormat == CropOutputFormat.Png)
                 {
-                    finalBitmap.Encode(ms, SKEncodedImageFormat.Png, 100);
+                    FinalBitmap.Encode(EncodingStream, SKEncodedImageFormat.Png, 100);
                 }
                 else
                 {
-                    int quality = Math.Max(0, Math.Min(100, this.JpegQuality));
-                    finalBitmap.Encode(ms, SKEncodedImageFormat.Jpeg, quality);
+                    int Quality = Math.Max(0, Math.Min(100, this.JpegQuality));
+                    FinalBitmap.Encode(EncodingStream, SKEncodedImageFormat.Jpeg, Quality);
                 }
-                return ms?.ToArray();
+                return EncodingStream?.ToArray();
             }
             catch (Exception ex)
             {
