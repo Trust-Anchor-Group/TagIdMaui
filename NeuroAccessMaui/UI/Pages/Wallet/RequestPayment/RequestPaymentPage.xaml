@@ -24,8 +24,7 @@
 
 				<Frame Style="{StaticResource FrameSet}">
 					<VerticalStackLayout Spacing="{StaticResource LargeSpacing}">
-						<VerticalStackLayout Margin="{StaticResource SmallMargins}"
-                         BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundColorLightTheme}, Dark={StaticResource PageBackgroundColorDarkTheme}}">
+						<VerticalStackLayout Margin="{StaticResource SmallMargins}">
 							<Label Text="{l:Localize RequestPayment}" Margin="{StaticResource SmallTopMargins}" VerticalOptions="Start"/>
 							<Label Text="{l:Localize RequestPaymentDescription}" Style="{StaticResource InfoLabel}" VerticalOptions="Start"/>
 							<!-- Note -->
