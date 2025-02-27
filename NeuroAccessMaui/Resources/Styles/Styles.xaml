@@ -14,7 +14,7 @@
 	<s:Double x:Key="MediumStrokeThickness">2</s:Double>
 	<s:Double x:Key="BoldStrokeThickness">4</s:Double>
 	<Thickness x:Key="NoMargins">0</Thickness>
-	<Thickness x:Key="SmallMargins">8</Thickness>
+	<Thickness x:Key="SmallMargins">8,8,8,8</Thickness>
 	<Thickness x:Key="SmallLeftMargins">8,0,0,0</Thickness>
 	<Thickness x:Key="SmallLeftRightMargins">8,0,8,0</Thickness>
 	<Thickness x:Key="SmallLeftRightTopMargins">8,8,8,0</Thickness>

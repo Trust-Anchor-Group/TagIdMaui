@@ -116,7 +116,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.MyContracts.ObjectModels
 						MarkdownOutput Markdown = new();
 
 						foreach (InlineElement Item in Section.Header)
-							Item.GenerateMarkdown(Markdown, 1, 0, new Waher.Networking.XMPP.Contracts.HumanReadable.MarkdownSettings(Contract, MarkdownType.ForRendering));
+							await Item.GenerateMarkdown(Markdown, 1, 0, new Waher.Networking.XMPP.Contracts.HumanReadable.MarkdownSettings(Contract, MarkdownType.ForRendering));
 
 						MarkdownDocument Doc = await MarkdownDocument.CreateAsync(Markdown.ToString());
 

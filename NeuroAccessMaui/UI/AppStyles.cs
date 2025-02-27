@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using NeuroAccessMaui.Services;
 using Waher.Events;
+using Waher.Script.Content.Functions.InputOutput;
 
 namespace NeuroAccessMaui.UI
 {
@@ -18,6 +19,7 @@ namespace NeuroAccessMaui.UI
 		private static Thickness? smallTopMargins;
 		private static Thickness? smallLeftMargins;
 		private static Thickness? smallRightMargins;
+		private static Thickness? smallMargins;
 		private static Style? sectionTitleLabelStyle;
 		private static Style? keyLabel;
 		private static Style? valueLabel;
@@ -38,18 +40,24 @@ namespace NeuroAccessMaui.UI
 		private static Style? receiveFrame;
 		private static Style? requiredFieldMarker;
 		private static Style? requiredFieldMarkerSpan;
+		private static Style? tableCellEven;
+		private static Style? tableCellOdd;
+		private static Style? tableCell;
+		private static Style?[] headers;
 		private static Style? roundedBorder;
-
 
 		static AppStyles()
 		{
 			Log.Terminating += Log_Terminating;
+			headers = new Style[9];
 		}
 
-		private static void Log_Terminating(object? sender, EventArgs e)
+		private static Task Log_Terminating(object? sender, EventArgs e)
 		{
 			timer?.Dispose();
 			timer = null;
+
+			return Task.CompletedTask;
 		}
 
 		/// <summary>
@@ -165,6 +173,18 @@ namespace NeuroAccessMaui.UI
 			{
 				smallRightMargins ??= TryGetResource<Thickness>("SmallRightMargins");
 				return smallRightMargins.Value;
+			}
+		}
+
+		/// <summary>
+		/// Small margins
+		/// </summary>
+		public static Thickness SmallMargins
+		{
+			get
+			{
+				smallMargins ??= TryGetResource<Thickness>("SmallMargins");
+				return smallMargins.Value;
 			}
 		}
 
@@ -406,6 +426,52 @@ namespace NeuroAccessMaui.UI
 				requiredFieldMarkerSpan ??= TryGetResource<Style>("RequiredFieldMarkerSpan");
 				return requiredFieldMarkerSpan!;
 			}
+		}
+
+		/// <summary>
+		/// Style for even table cells
+		/// </summary>
+		public static Style TableCellEven
+		{
+			get
+			{
+				tableCellEven ??= TryGetResource<Style>("TableCellEven");
+				return tableCellEven!;
+			}
+		}
+
+		/// <summary>
+		/// Style for odd table cells
+		/// </summary>
+		public static Style TableCellOdd
+		{
+			get
+			{
+				tableCellOdd ??= TryGetResource<Style>("TableCellOdd");
+				return tableCellOdd!;
+			}
+		}
+
+		/// <summary>
+		/// Style for table cells
+		/// </summary>
+		public static Style TableCell
+		{
+			get
+			{
+				tableCell ??= TryGetResource<Style>("TableCell");
+				return tableCell!;
+			}
+		}
+
+		/// <summary>
+		/// Get style for header of certain size
+		/// </summary>
+		public static Style GetHeaderStyle(int x)
+		{
+			headers[x - 1] ??= TryGetResource<Style>($"Header{x}");
+
+			return headers[x - 1]!;
 		}
 
 		public static Style RoundedBorder

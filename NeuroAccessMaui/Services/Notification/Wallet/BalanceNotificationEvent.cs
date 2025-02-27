@@ -1,4 +1,5 @@
 ﻿using EDaler;
+using EDaler.Events;
 using NeuroAccessMaui.Resources.Languages;
 using NeuroAccessMaui.Services.Contacts;
 using NeuroAccessMaui.UI.Pages.Wallet;

@@ -28,10 +28,12 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 		/// Method called (from main thread) when contract options are made available.
 		/// </summary>
 		/// <param name="Options">Available options, as dictionaries with contract parameters.</param>
-		public async Task ShowContractOptions(IDictionary<CaseInsensitiveString, object>[] Options)
+		public Task ShowContractOptions(IDictionary<CaseInsensitiveString, object>[] Options)
 		{
 			//if (this.ContentPageModel is NewContractViewModel ViewModel)
 			//await ViewModel.ShowContractOptions(Options);
+
+			return Task.CompletedTask;
 		}
 
 	}

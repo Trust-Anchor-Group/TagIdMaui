@@ -13,6 +13,7 @@ using NeuroAccessMaui.UI.Pages.Wallet.MachineReport.Reports;
 using NeuroAccessMaui.UI.Pages.Wallet.MachineVariables;
 using NeuroAccessMaui.UI.Pages.Wallet.TokenEvents;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using NeuroFeatures.Events;
 using NeuroFeatures.Tags;
 using System.Collections.ObjectModel;

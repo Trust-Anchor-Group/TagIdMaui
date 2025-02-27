@@ -16,7 +16,7 @@ namespace NeuroAccessMaui.Services.Data.PersonalNumbers
 		{
 			try
 			{
-				using MemoryStream ms = new(Waher.Content.Resources.LoadResource(
+				using MemoryStream ms = new(Waher.Runtime.IO.Resources.LoadResource(
 					typeof(PersonalNumberSchemes).Namespace + "." + typeof(PersonalNumberSchemes).Name + ".xml"));
 
 				XmlDocument Doc = new();

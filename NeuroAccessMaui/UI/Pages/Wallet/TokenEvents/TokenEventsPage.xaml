@@ -148,6 +148,42 @@
 				</Grid>
 			</ViewCell>
 		</DataTemplate>
+		<DataTemplate x:Key="DonatedEvent" x:DataType="events:DonatedItem">
+			<ViewCell>
+				<Grid ColumnDefinitions="*,*" RowDefinitions="auto,auto,auto,auto" Margin="{StaticResource SmallBottomMargins}">
+					<Label Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource TableHeader}">
+						<Label.FormattedText>
+							<FormattedString>
+								<Span Text="{Binding Timestamp, Converter={converters:DateTimeToString}}"/>
+								<Span Text=", "/>
+								<Span Text="{l:Localize Donated}"/>
+							</FormattedString>
+						</Label.FormattedText>
+					</Label>
+
+					<Label Grid.Column="0" Grid.Row="1" Text="{l:Localize Donor}" Style="{StaticResource KeyLabel}"/>
+					<Label Grid.Column="1" Grid.Row="1" Text="{Binding DonorFriendlyName}" Style="{StaticResource ClickableValueLabel}">
+						<Label.GestureRecognizers>
+							<TapGestureRecognizer Command="{Binding ViewIdCommand}" CommandParameter="{Binding Donor}" />
+						</Label.GestureRecognizers>
+					</Label>
+
+					<Label Grid.Column="0" Grid.Row="2" Text="{l:Localize Owner}" Style="{StaticResource KeyLabel}"/>
+					<Label Grid.Column="1" Grid.Row="2" Text="{Binding OwnerFriendlyName}" Style="{StaticResource ClickableValueLabel}">
+						<Label.GestureRecognizers>
+							<TapGestureRecognizer Command="{Binding ViewIdCommand}" CommandParameter="{Binding Owner}" />
+						</Label.GestureRecognizers>
+					</Label>
+
+					<Label Grid.Column="0" Grid.Row="3" Text="{l:Localize OwnershipContract}" Style="{StaticResource KeyLabel}"/>
+					<Label Grid.Column="1" Grid.Row="3" Text="{Binding OwnershipContract}" Style="{StaticResource ClickableValueLabel}">
+						<Label.GestureRecognizers>
+							<TapGestureRecognizer Command="{Binding ViewContractCommand}" CommandParameter="{Binding OwnershipContract}" />
+						</Label.GestureRecognizers>
+					</Label>
+				</Grid>
+			</ViewCell>
+		</DataTemplate>
 		<DataTemplate x:Key="NoteText" x:DataType="events:NoteTextItem">
 			<ViewCell>
 				<Grid ColumnDefinitions="*,*" RowDefinitions="auto,auto" Margin="{StaticResource SmallBottomMargins}">
@@ -262,6 +298,7 @@
 														 CreatedTemplate="{StaticResource CreatedEvent}" 
 														 DestroyedTemplate="{StaticResource DestroyedEvent}" 
 														 TransferredTemplate="{StaticResource TransferredEvent}" 
+														 DonatedTemplate="{StaticResource DonatedEvent}" 
 														 NoteTextTemplate="{StaticResource NoteText}" 
 														 NoteXmlTemplate="{StaticResource NoteXml}"
 														 ExternalNoteTextTemplate="{StaticResource ExternalNoteText}" 

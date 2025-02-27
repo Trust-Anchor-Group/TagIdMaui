@@ -8,12 +8,15 @@ using NeuroAccessMaui.UI.Pages.Petitions.PetitionIdentity;
 using NeuroAccessMaui.UI.Pages.Petitions.PetitionPeerReview;
 using NeuroAccessMaui.UI.Pages.Petitions.PetitionSignature;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
+using System.Data;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
 using Waher.Content.Xml;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Networking.XMPP.StanzaErrors;
 using Waher.Persistence;
 using Waher.Persistence.Filters;
@@ -362,7 +365,8 @@ namespace NeuroAccessMaui.Services.Contracts
 		{
 			try
 			{
-				if (ServiceRef.XmppService.IsOnline && ServiceRef.TagProfile.IsCompleteOrWaitingForValidation())
+				if (ServiceRef.XmppService.IsOnline &&
+					ServiceRef.TagProfile.IsCompleteOrWaitingForValidation())
 				{
 					if (ServiceRef.TagProfile.LegalIdentity is not null)
 					{

@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Text;
 using Waher.Content;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Networking.XMPP.HttpFileUpload;
 using Waher.Script;
 

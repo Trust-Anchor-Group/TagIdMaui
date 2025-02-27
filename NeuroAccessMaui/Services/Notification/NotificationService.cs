@@ -182,14 +182,7 @@ namespace NeuroAccessMaui.Services.Notification
 						Events.Add(Event);
 					}
 
-					try
-					{
-						this.OnNewNotification?.Invoke(this, new NotificationEventArgs(Event));
-					}
-					catch (Exception ex)
-					{
-						ServiceRef.LogService.LogException(ex);
-					}
+					await this.OnNewNotification.Raise(this, new NotificationEventArgs(Event));
 				}
 
 				Task _ = Task.Run(async () =>
@@ -292,7 +285,7 @@ namespace NeuroAccessMaui.Services.Notification
 					await Database.EndBulk();
 				}
 
-				this.OnNotificationsDeleted?.Invoke(this, new NotificationEventsArgs(Events));
+				await this.OnNotificationsDeleted.Raise(this, new NotificationEventsArgs(Events));
 			}
 			catch (Exception ex)
 			{
@@ -439,12 +432,12 @@ namespace NeuroAccessMaui.Services.Notification
 		/// <summary>
 		/// Event raised when a new notification has been logged.
 		/// </summary>
-		public event NotificationEventHandler? OnNewNotification;
+		public event EventHandlerAsync<NotificationEventArgs>? OnNewNotification;
 
 		/// <summary>
 		/// Event raised when notifications have been deleted.
 		/// </summary>
-		public event NotificationEventsHandler? OnNotificationsDeleted;
+		public event EventHandlerAsync<NotificationEventsArgs>? OnNotificationsDeleted;
 
 		/// <summary>
 		/// Number of notifications but button Contacts

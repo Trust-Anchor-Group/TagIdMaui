@@ -14,6 +14,7 @@ using Waher.Networking.DNS.ResourceRecords;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Networking.XMPP.Provisioning;
+using Waher.Networking.XMPP.Provisioning.Events;
 using Waher.Persistence;
 
 namespace NeuroAccessMaui.UI.Pages.Things.ViewClaimThing

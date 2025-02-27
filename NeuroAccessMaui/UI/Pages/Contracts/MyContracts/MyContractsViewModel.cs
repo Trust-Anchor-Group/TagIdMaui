@@ -413,7 +413,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.MyContracts
 			}
 		}
 
-		private void NotificationService_OnNotificationsDeleted(object? Sender, NotificationEventsArgs e)
+		private Task NotificationService_OnNotificationsDeleted(object? Sender, NotificationEventsArgs e)
 		{
 			MainThread.BeginInvokeOnMainThread(() =>
 			{
@@ -438,30 +438,34 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.MyContracts
 					}
 				}
 			});
+
+			return Task.CompletedTask;
 		}
 
-		private void NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
+		private Task NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
 		{
-			if (e.Event.Type != NotificationEventType.Contracts)
-				return;
-
-			MainThread.BeginInvokeOnMainThread(() =>
+			if (e.Event.Type == NotificationEventType.Contracts)
 			{
-				HeaderModel? LastHeader = null;
-
-				foreach (IUniqueItem Group in this.Categories)
+				MainThread.BeginInvokeOnMainThread(() =>
 				{
-					if (Group is HeaderModel Header)
-						LastHeader = Header;
-					else if (Group is ContractModel Contract && Contract.ContractId == e.Event.Category)
-					{
-						if (Contract.AddEvent(e.Event) && LastHeader is not null)
-							LastHeader.NrEvents++;
+					HeaderModel? LastHeader = null;
 
-						break;
+					foreach (IUniqueItem Group in this.Categories)
+					{
+						if (Group is HeaderModel Header)
+							LastHeader = Header;
+						else if (Group is ContractModel Contract && Contract.ContractId == e.Event.Category)
+						{
+							if (Contract.AddEvent(e.Event) && LastHeader is not null)
+								LastHeader.NrEvents++;
+
+							break;
+						}
 					}
-				}
-			});
+				});
+			}
+
+			return Task.CompletedTask;
 		}
 	}
 }

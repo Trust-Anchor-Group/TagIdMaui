@@ -1,11 +1,12 @@
-﻿using NeuroAccessMaui.UI.Pages.Wallet.MyWallet.ObjectModels;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using NeuroAccessMaui.UI.Pages.Wallet.MyWallet.ObjectModels;
+using NeuroAccessMaui.Services;
 using NeuroAccessMaui.Services.Notification;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using System.Collections.ObjectModel;
 using Waher.Persistence;
-using NeuroAccessMaui.Services;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 
 namespace NeuroAccessMaui.UI.Pages.Wallet.MyTokens
 {

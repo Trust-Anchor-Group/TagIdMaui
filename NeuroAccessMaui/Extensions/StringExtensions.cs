@@ -107,7 +107,7 @@ namespace NeuroAccessMaui.Extensions
 				Layout.Children.Add(new Label()
 				{
 					Text = ex.Message,
-					FontFamily = "Courier New",
+					FontFamily = "SpaceGroteskRegular",
 					TextColor = Colors.Red,
 					TextType = TextType.Text
 				});

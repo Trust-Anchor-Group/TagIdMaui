@@ -704,9 +704,9 @@ namespace NeuroAccessMaui.Services
 			if (keypadHeight > availableScreenHeight * 0.15)
 			{
 				this.lastKeyboardHeight = keypadHeight;
-				this.KeyboardSizeChanged?.Invoke(this, new KeyboardSizeMessage(keypadHeight));
+				this.KeyboardSizeChanged.Raise(this, new KeyboardSizeMessage(keypadHeight));
 				WeakReferenceMessenger.Default.Send(new KeyboardSizeMessage(keypadHeight));
-				this.KeyboardShown?.Invoke(this, new KeyboardSizeMessage(keypadHeight));
+				this.KeyboardShown.Raise(this, new KeyboardSizeMessage(keypadHeight));
 			}
 			else
 			{
@@ -714,9 +714,9 @@ namespace NeuroAccessMaui.Services
 					return;
 
 				this.lastKeyboardHeight = 0;
-				this.KeyboardSizeChanged?.Invoke(this, new KeyboardSizeMessage(0));
+				this.KeyboardSizeChanged.Raise(this, new KeyboardSizeMessage(0));
 				WeakReferenceMessenger.Default.Send(new KeyboardSizeMessage(0));
-				this.KeyboardHidden?.Invoke(this, new KeyboardSizeMessage(0));
+				this.KeyboardHidden.Raise(this, new KeyboardSizeMessage(0));
 			}
 		}
 		#endregion

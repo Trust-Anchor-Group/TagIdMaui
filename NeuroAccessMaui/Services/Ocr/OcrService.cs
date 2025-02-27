@@ -54,9 +54,10 @@ namespace NeuroAccessMaui.Services.Ocr
 
 			byte[] Bin = await Response.Content.ReadAsByteArrayAsync();
 			string? ContentType = Response.Content.Headers.ContentType?.ToString();
-			object Obj = await InternetContent.DecodeAsync(ContentType, Bin, Uri);
+			ContentResponse Obj = await InternetContent.DecodeAsync(ContentType, Bin, Uri);
+			Obj.AssertOk();
 
-			if (Obj is not string Text)
+			if (Obj.Decoded is not string Text)
 				throw new Exception("Unexpected response.");
 
 			if (string.IsNullOrEmpty(Text))

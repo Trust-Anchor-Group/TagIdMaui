@@ -3,44 +3,27 @@
 namespace NeuroAccessMaui.Services.Push
 {
 	/// <summary>
-	/// Delegate for token event handlers.
-	/// </summary>
-	/// <param name="Sender">Sender of event.</param>
-	/// <param name="e">Event arguments.</param>
-	public delegate Task TokenEventHandler(object? Sender, TokenEventArgs e);
-
-	/// <summary>
 	/// Event argumens for token-based events.
 	/// </summary>
-	public class TokenEventArgs : EventArgs
+	/// <param name="Source">Source of notification</param>
+	/// <param name="Token">Token</param>
+	/// <param name="ClientType">Client Type</param>
+	public class TokenEventArgs(PushMessagingService Source, string Token, ClientType ClientType)
+		: EventArgs()
 	{
-		/// <summary>
-		/// Event argumens for token-based events.
-		/// </summary>
-		/// <param name="Source">Source of notification</param>
-		/// <param name="Token">Token</param>
-		/// <param name="ClientType">Client Type</param>
-		public TokenEventArgs(PushMessagingService Source, string Token, ClientType ClientType)
-			: base()
-		{
-			this.Source = Source;
-			this.Token = Token;
-			this.ClientType = ClientType;
-		}
-
 		/// <summary>
 		/// Source of notification
 		/// </summary>
-		public PushMessagingService Source { get; }
+		public PushMessagingService Source { get; } = Source;
 
 		/// <summary>
 		/// Token
 		/// </summary>
-		public string Token { get; }
+		public string Token { get; } = Token;
 
 		/// <summary>
 		/// Client Type
 		/// </summary>
-		public ClientType ClientType { get; }
+		public ClientType ClientType { get; } = ClientType;
 	}
 }

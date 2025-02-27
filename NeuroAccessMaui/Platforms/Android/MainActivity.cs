@@ -185,7 +185,7 @@ namespace NeuroAccessMaui
 			}
 			catch (Exception ex)
 			{
-				Waher.Events.Log.Critical(ex);
+				Waher.Events.Log.Exception(ex);
 				// TODO: Handle read & connection errors.
 			}
 		}

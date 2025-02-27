@@ -43,6 +43,8 @@
 		private static Color? normalEditForegroundLight;
 		private static Color? normalEditBackgroundDark;
 		private static Color? normalEditBackgroundLight;
+		private static Color? normalEditPlaceholderDark;
+		private static Color? normalEditPlaceholderLight;
 		private static Color? alertDark;
 		private static Color? alertLight;
 		private static Color? errorBackgroundDark;
@@ -52,6 +54,9 @@
 		private static Color? weakPasswordForeground;
 		private static Color? mediumPasswordForeground;
 		private static Color? strongPasswordForeground;
+		private static Color? blueLink;
+		private static Color? insertedBorder;
+		private static Color? deletedBorder;
 		private static Color? purple15Light;
 		private static Color? purple15Dark;
 		private static Color? purpleLight;
@@ -60,8 +65,6 @@
 		private static Color? blue20AffirmDark;
 		private static Color? blueLight;
 		private static Color? blueDark;
-
-		
 
 		/// <summary>
 		/// Primary foreground color.
@@ -444,6 +447,26 @@
 		}
 
 		/// <summary>
+		/// NormalEdit placeholder color.
+		/// </summary>
+		public static Color NormalEditPlaceholder
+		{
+			get
+			{
+				if (Application.Current?.RequestedTheme == AppTheme.Dark)
+				{
+					normalEditBackgroundDark ??= AppStyles.TryGetResource<Color>("NormalEditPlaceholderDark");
+					return normalEditPlaceholderDark!;
+				}
+				else
+				{
+					normalEditBackgroundLight ??= AppStyles.TryGetResource<Color>("NormalEditPlaceholderLight");
+					return normalEditPlaceholderLight!;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Alert color.
 		/// </summary>
 		public static Color Alert
@@ -564,6 +587,25 @@
 		}
 
 		/// <summary>
+		/// Blue link color
+		/// </summary>
+		public static Color BlueLink
+		{
+			get
+			{
+				if (Application.Current?.RequestedTheme == AppTheme.Dark)
+				{
+					blueLink ??= AppStyles.TryGetResource<Color>("BlueLinkDark");
+					return blueLink!;
+				}
+				else
+				{
+					blueLink ??= AppStyles.TryGetResource<Color>("BlueLink");
+					return blueLink!;
+				}
+			}
+		}
+
 		/// Purple color with 15% transparency.
 		/// </summary>
 		public static Color Purple15
@@ -584,6 +626,26 @@
 		}
 
 		/// <summary>
+		/// Inserted Border color
+		/// </summary>
+		public static Color InsertedBorder
+		{
+			get
+			{
+				if (Application.Current?.RequestedTheme == AppTheme.Light)
+				{
+					insertedBorder ??= AppStyles.TryGetResource<Color>("InsertedBorderLight");
+					return insertedBorder!;
+				}
+				else
+				{
+					insertedBorder ??= AppStyles.TryGetResource<Color>("InsertedBorderDark");
+					return insertedBorder!;
+				}
+			}
+		}
+
+
 		/// Purple color
 		/// </summary>
 		public static Color Purple
@@ -604,6 +666,25 @@
 		}
 
 		/// <summary>
+		/// Deleted Border color
+		/// </summary>
+		public static Color DeletedBorder
+		{
+			get
+			{
+				if (Application.Current?.RequestedTheme == AppTheme.Light)
+				{
+					deletedBorder ??= AppStyles.TryGetResource<Color>("DeletedBorderLight");
+					return deletedBorder!;
+				}
+				else
+				{
+					deletedBorder ??= AppStyles.TryGetResource<Color>("DeletedBorderDark");
+					return deletedBorder!;
+				}
+			}
+		}
+
 		/// Blue affirm color with 20% transparency.
 		/// </summary>
 		public static Color Blue20Affirm

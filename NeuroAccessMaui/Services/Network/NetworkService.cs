@@ -4,6 +4,7 @@ using System.Runtime.ExceptionServices;
 using NeuroAccessMaui.Exceptions;
 using NeuroAccessMaui.Extensions;
 using NeuroAccessMaui.Resources.Languages;
+using Waher.Events;
 using Waher.Networking.DNS;
 using Waher.Networking.DNS.ResourceRecords;
 using Waher.Networking.XMPP;
@@ -52,7 +53,7 @@ namespace NeuroAccessMaui.Services.Network
 
 		private void Connectivity_ConnectivityChanged(object? Sender, ConnectivityChangedEventArgs e)
 		{
-			this.ConnectivityChanged?.Invoke(this, e);
+			this.ConnectivityChanged.Raise(this, e);
 		}
 
 		public virtual bool IsOnline =>

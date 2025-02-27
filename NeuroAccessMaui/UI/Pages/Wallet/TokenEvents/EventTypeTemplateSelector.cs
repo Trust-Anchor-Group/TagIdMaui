@@ -21,6 +21,11 @@
 		public DataTemplate? TransferredTemplate { get; set; }
 
 		/// <summary>
+		/// Template to use for donation events.
+		/// </summary>
+		public DataTemplate? DonatedTemplate { get; set; }
+
+		/// <summary>
 		/// Template to use for text note events.
 		/// </summary>
 		public DataTemplate? NoteTextTemplate { get; set; }
@@ -55,6 +60,7 @@
 					EventType.Created => this.CreatedTemplate ?? this.DefaultTemplate,
 					EventType.Destroyed => this.DestroyedTemplate ?? this.DefaultTemplate,
 					EventType.Transferred => this.TransferredTemplate ?? this.DefaultTemplate,
+					EventType.Donated => this.DonatedTemplate ?? this.DefaultTemplate,
 					EventType.NoteText => this.NoteTextTemplate ?? this.DefaultTemplate,
 					EventType.NoteXml => this.NoteXmlTemplate ?? this.DefaultTemplate,
 					EventType.ExternalNoteText => this.ExternalNoteTextTemplate ?? this.DefaultTemplate,

@@ -9,7 +9,7 @@ using Waher.Runtime.Inventory;
 namespace NeuroAccessMaui.Services.Storage
 {
 	[Singleton]
-	internal sealed class StorageService : IStorageService, IDisposable
+	internal sealed class StorageService : IStorageService, IDisposableAsync
 	{
 		private readonly LinkedList<TaskCompletionSource<bool>> tasksWaiting = new();
 		private readonly string dataFolder;
@@ -155,7 +155,7 @@ namespace NeuroAccessMaui.Services.Storage
 				if (this.persistedEventLog is not null)
 				{
 					Log.Unregister(this.persistedEventLog);
-					this.persistedEventLog.Dispose();
+					await this.persistedEventLog.DisposeAsync();
 					this.persistedEventLog = null;
 				}
 
@@ -184,13 +184,28 @@ namespace NeuroAccessMaui.Services.Storage
 		/// <summary>
 		/// <see cref="IDisposable.Dispose"/>
 		/// </summary>
+		[Obsolete("Use DisposeAsync() instead.")]
 		public void Dispose()
 		{
-			this.persistedEventLog?.Dispose();
-			this.persistedEventLog = null;
+			this.DisposeAsync().Wait();
+		}
 
-			this.databaseProvider?.Dispose();
-			this.databaseProvider = null;
+		/// <summary>
+		/// <see cref="IDisposableAsync.DisposeAsync"/>
+		/// </summary>
+		public async Task DisposeAsync()
+		{
+			if (this.persistedEventLog is not null)
+			{
+				await this.persistedEventLog.DisposeAsync();
+				this.persistedEventLog = null;
+			}
+
+			if (this.databaseProvider is not null)
+			{
+				await this.databaseProvider.DisposeAsync();
+				this.databaseProvider = null;
+			}
 		}
 
 		#endregion

@@ -52,7 +52,7 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.MachineVariables
 			return base.OnDispose();
 		}
 
-		private Task Wallet_StateUpdated(object? Sender, NeuroFeatures.NewStateEventArgs e)
+		private Task Wallet_StateUpdated(object? Sender, NeuroFeatures.EventArguments.NewStateEventArgs e)
 		{
 			MainThread.BeginInvokeOnMainThread(() =>
 			{
@@ -64,7 +64,7 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.MachineVariables
 			return Task.CompletedTask;
 		}
 
-		private Task Wallet_VariablesUpdated(object? Sender, NeuroFeatures.VariablesUpdatedEventArgs e)
+		private Task Wallet_VariablesUpdated(object? Sender, NeuroFeatures.EventArguments.VariablesUpdatedEventArgs e)
 		{
 			MainThread.BeginInvokeOnMainThread(() =>
 			{

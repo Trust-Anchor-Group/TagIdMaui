@@ -162,11 +162,18 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 				if (AcceptLanguage != "en")
 					AcceptLanguage += ";q=1,en;q=0.9";
 
-				object Result = await InternetContent.GetAsync(DomainInfo,
+				ContentResponse Result = await InternetContent.GetAsync(DomainInfo,
 					new KeyValuePair<string, string>("Accept", "application/json"),
 					new KeyValuePair<string, string>("Accept-Language", AcceptLanguage),
 					new KeyValuePair<string, string>("Accept-Encoding", "0"));
-				if (Result is Dictionary<string, object> Response)
+
+				if (Result.HasError)
+				{
+					ServiceRef.LogService.LogException(Result.Error);
+					return;
+				}
+
+				if (Result.Decoded is Dictionary<string, object> Response)
 				{
 					if (Response.TryGetValue("humanReadableName", out object? Obj) && Obj is string LocalizedName)
 						this.LocalizedName = LocalizedName;
@@ -271,12 +278,15 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 			{
 				try
 				{
-					KeyValuePair<byte[], string> P = await InternetContent.PostAsync(Uri, Encoding.ASCII.GetBytes(Code), "text/plain",
+					ContentBinaryResponse Response = await InternetContent.PostAsync(Uri, Encoding.ASCII.GetBytes(Code), "text/plain",
 						new KeyValuePair<string, string>("Accept", "text/plain"));
 
-					object Decoded = await InternetContent.DecodeAsync(P.Value, P.Key, Uri);
+					Response.AssertOk();
 
-					EncryptedStr = (string)Decoded;
+					ContentResponse Decoded = await InternetContent.DecodeAsync(Response.ContentType, Response.Encoded, Uri);
+					Decoded.AssertOk();
+
+					EncryptedStr = (string)Decoded.Decoded;
 				}
 				catch (Exception ex)
 				{

@@ -7,6 +7,7 @@ using Waher.Persistence.Attributes;
 using NeuroAccessMaui.Services.UI;
 using Microsoft.Maui.Controls.Shapes;
 using NeuroAccessMaui.UI;
+using NeuroFeatures.EventArguments;
 
 namespace NeuroAccessMaui.Services.Notification.Wallet
 {

@@ -34,7 +34,7 @@ namespace NeuroAccessMaui.Services.AppPermissions
 				}
 				return Status;
 			}
-			catch (Exception Ex)
+			catch (Exception)
 			{
 				return PermissionStatus.Unknown;
 			}

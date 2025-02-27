@@ -40,16 +40,18 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 			{
 				try
 				{
-					object Result = await InternetContent.PostAsync(
+					ContentResponse Result = await InternetContent.PostAsync(
 						new Uri("https://" + Constants.Domains.IdDomain + "/ID/CountryCode.ws"), string.Empty,
 						new KeyValuePair<string, string>("Accept", "application/json"));
 
-					if ((Result is Dictionary<string, object> Response) &&
+					Result.AssertOk();
+
+					if ((Result.Decoded is Dictionary<string, object> Response) &&
 						Response.TryGetValue("CountryCode", out object? cc) &&
-						(cc is string CountryCode))
+						cc is string CountryCode &&
+						ISO_3166_1.TryGetCountryByCode(CountryCode, out ISO_3166_Country? Country))
 					{
-						if (ISO_3166_1.TryGetCountryByCode(CountryCode, out ISO_3166_Country? Country))
-							this.SelectedCountry = Country;
+						this.SelectedCountry = Country;
 					}
 				}
 				catch (Exception ex)
@@ -85,16 +87,18 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 			{
 				try
 				{
-					object Result = await InternetContent.PostAsync(
+					ContentResponse Result = await InternetContent.PostAsync(
 						new Uri("https://" + Constants.Domains.IdDomain + "/ID/CountryCode.ws"), string.Empty,
 						new KeyValuePair<string, string>("Accept", "application/json"));
 
-					if ((Result is Dictionary<string, object> Response) &&
+					Result.AssertOk();
+
+					if ((Result.Decoded is Dictionary<string, object> Response) &&
 						Response.TryGetValue("CountryCode", out object? cc) &&
-						(cc is string CountryCode))
+						cc is string CountryCode &&
+						ISO_3166_1.TryGetCountryByCode(CountryCode, out ISO_3166_Country? Country))
 					{
-						if (ISO_3166_1.TryGetCountryByCode(CountryCode, out ISO_3166_Country? Country))
-							this.SelectedCountry = Country;
+						this.SelectedCountry = Country;
 					}
 				}
 				catch (Exception ex)
@@ -222,7 +226,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 				if (this.SelectedCountry.DialCode == "46") //TODO: Make this more generic for other countries
 					FullPhoneNumber = $"+{this.SelectedCountry.DialCode}{this.PhoneNumber.TrimStart('0')}";
 
-				object SendResult = await InternetContent.PostAsync(
+				ContentResponse SendResult = await InternetContent.PostAsync(
 					new Uri("https://" + Constants.Domains.IdDomain + "/ID/SendVerificationMessage.ws"),
 					new Dictionary<string, object>()
 					{
@@ -231,7 +235,9 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 						{ "Language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
 					}, new KeyValuePair<string, string>("Accept", "application/json"));
 
-				if (SendResult is Dictionary<string, object> SendResponse &&
+				SendResult.AssertOk();
+
+				if (SendResult.Decoded is Dictionary<string, object> SendResponse &&
 					SendResponse.TryGetValue("Status", out object? Obj) && Obj is bool SendStatus && SendStatus &&
 					SendResponse.TryGetValue("IsTemporary", out Obj) && Obj is bool SendIsTemporary)
 				{
@@ -258,7 +264,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 							PurposeUse Purpose = ServiceRef.TagProfile.Purpose;
 							bool IsTest = (Purpose == PurposeUse.Educational) || (Purpose == PurposeUse.Experimental);
 
-							object VerifyResult = await InternetContent.PostAsync(
+							ContentResponse VerifyResult = await InternetContent.PostAsync(
 								new Uri("https://" + Constants.Domains.IdDomain + "/ID/VerifyNumber.ws"),
 								new Dictionary<string, object>()
 								{
@@ -267,8 +273,9 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 									{ "Test", IsTest }
 								}, new KeyValuePair<string, string>("Accept", "application/json"));
 
+							VerifyResult.AssertOk();
 
-							if (VerifyResult is Dictionary<string, object> VerifyResponse &&
+							if (VerifyResult.Decoded is Dictionary<string, object> VerifyResponse &&
 								VerifyResponse.TryGetValue("Status", out Obj) && Obj is bool VerifyStatus && VerifyStatus &&
 								VerifyResponse.TryGetValue("Domain", out Obj) && Obj is string VerifyDomain &&
 								VerifyResponse.TryGetValue("Key", out Obj) && Obj is string VerifyKey &&
@@ -299,6 +306,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 
 									ServiceRef.TagProfile.SetDomain(VerifyDomain, DefaultConnectivity, VerifyKey, VerifySecret);
 								}
+
 								if (VerifyIsTemporary)
 									GoToRegistrationStep(RegistrationStep.NameEntry);
 								else
@@ -353,7 +361,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 				if (this.SelectedCountry.DialCode == "46") //If swedish phone nr
 					FullPhoneNumber = $"+{this.SelectedCountry.DialCode}{this.PhoneNumber.TrimStart('0')}";
 
-				object SendResult = await InternetContent.PostAsync(
+				ContentResponse SendResult = await InternetContent.PostAsync(
 					new Uri("https://" + Constants.Domains.IdDomain + "/ID/SendVerificationMessage.ws"),
 					new Dictionary<string, object>()
 					{
@@ -362,8 +370,12 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 						{ "Language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
 					}, new KeyValuePair<string, string>("Accept", "application/json"));
 
-				if (SendResult is Dictionary<string, object> SendResponse &&
-					SendResponse.TryGetValue("Status", out object? Obj) && Obj is bool SendStatus && SendStatus)
+				SendResult.AssertOk();
+
+				if (SendResult.Decoded is Dictionary<string, object> SendResponse &&
+					SendResponse.TryGetValue("Status", out object? Obj) &&
+					Obj is bool SendStatus &&
+					SendStatus)
 				{
 					this.StartTimer();
 				}

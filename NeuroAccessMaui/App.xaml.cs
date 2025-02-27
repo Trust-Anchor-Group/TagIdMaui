@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
@@ -65,7 +65,7 @@ namespace NeuroAccessMaui
 	/// <summary>
 	/// Represents an instance of the Neuro-Access app.
 	/// </summary>
-	public partial class App : Application, IDisposable
+	public partial class App : Application, IDisposableAsync
 	{
 		#region Fields
 
@@ -534,7 +534,8 @@ namespace NeuroAccessMaui
 						await ServiceRef.StorageService.Shutdown();
 				}
 
-				Log.Terminate();
+				// Causes list of singleton instances to be cleared.
+				await Log.TerminateAsync();
 			}
 			finally
 			{
@@ -759,7 +760,7 @@ namespace NeuroAccessMaui
 			}
 			catch (Exception Ex)
 			{
-				Log.Critical(Ex);
+				Log.Exception(Ex);
 			}
 		}
 
@@ -1008,19 +1009,28 @@ namespace NeuroAccessMaui
 			GC.SuppressFinalize(this);
 		}
 
+		/// <summary>
+		/// <see cref="IDisposableAsync.Dispose"/>
+		/// </summary>
 		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
+				this.DisposeAsync().Wait();
+		}
+
+		/// <summary>
+		/// <see cref="IDisposableAsync.Dispose"/>
+		/// </summary>
+		public virtual async Task DisposeAsync()
 		{
 			if (this.isDisposed)
 				return;
 
-			if (disposing)
-			{
-				this.loginAuditor.Dispose();
-				this.autoSaveTimer?.Dispose();
-				this.initCompleted.Dispose();
-				this.startupWorker.Dispose();
-				this.startupCancellation.Dispose();
-			}
+			await this.loginAuditor.DisposeAsync();
+			this.autoSaveTimer?.Dispose();
+			this.initCompleted.Dispose();
+			this.startupWorker.Dispose();
+			this.startupCancellation.Dispose();
 
 			this.isDisposed = true;
 		}

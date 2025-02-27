@@ -18,6 +18,7 @@ using NeuroAccessMaui.UI.Pages.Main.VerifyCode;
 using Waher.Content.Xml;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using ZXing;
 
 namespace NeuroAccessMaui.UI.Pages.Registration.Views
 {
@@ -73,11 +74,17 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 
 			try
 			{
-				object Result = await InternetContent.PostAsync(
+				ContentResponse Result = await InternetContent.PostAsync(
 					new Uri("https://" + Constants.Domains.IdDomain + "/ID/CountryCode.ws"), string.Empty,
 					new KeyValuePair<string, string>("Accept", "application/json"));
 
-				if ((Result is Dictionary<string, object> Response) &&
+				if (Result.HasError)
+				{
+					ServiceRef.LogService.LogException(Result.Error);
+					return;
+				}
+
+				if ((Result.Decoded is Dictionary<string, object> Response) &&
 					 Response.TryGetValue("CountryCode", out object? cc) &&
 					 (cc is string CountryCode))
 				{
@@ -193,32 +200,34 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 					return;
 				}
 
-				string fullPhoneNumber = $"+{this.SelectedCountry.DialCode}{this.PhoneText}";
+				string FullPhoneNumber = $"+{this.SelectedCountry.DialCode}{this.PhoneText}";
 
 				if (this.SelectedCountry.DialCode == "46") // Adjust for Swedish numbers
-					fullPhoneNumber = $"+{this.SelectedCountry.DialCode}{this.PhoneText.TrimStart('0')}";
+					FullPhoneNumber = $"+{this.SelectedCountry.DialCode}{this.PhoneText.TrimStart('0')}";
 
 				// Send phone verification code
-				object phoneSendResult = await InternetContent.PostAsync(
+				ContentResponse PhoneSendResult = await InternetContent.PostAsync(
 					 new Uri("https://" + Constants.Domains.IdDomain + "/ID/SendVerificationMessage.ws"),
 					 new Dictionary<string, object>
 					 {
-					 { "Nr", fullPhoneNumber },
-					 { "AppName", Constants.Application.Name },
-					 { "Language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
+						 { "Nr", FullPhoneNumber },
+						 { "AppName", Constants.Application.Name },
+						 { "Language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
 					 }, new KeyValuePair<string, string>("Accept", "application/json"));
 
+				PhoneSendResult.AssertOk();
 
-				bool phoneSent = phoneSendResult is Dictionary<string, object> phoneResponse &&
-									  phoneResponse.TryGetValue("Status", out object? phoneObj) &&
-									  phoneObj is bool phoneStatus && phoneStatus;
+				bool PhoneSent = PhoneSendResult.Decoded is Dictionary<string, object> PhoneResponse &&
+									  PhoneResponse.TryGetValue("Status", out object? PhoneObj) &&
+									  PhoneObj is bool PhoneStatus &&
+									  PhoneStatus;
 
-				if (phoneSent)
+				if (PhoneSent)
 				{
 					this.StartTimer();
 
 					// Navigate to VerifyCodePage for phone code
-					if (!await this.VerifyCodeAsync(fullPhoneNumber, isEmail: false))
+					if (!await this.VerifyCodeAsync(FullPhoneNumber, IsEmail: false))
 					{
 						return;
 					}
@@ -247,29 +256,32 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 			return Task.CompletedTask;
 		}
 
-		private async Task<bool> VerifyCodeAsync(string identifier, bool isEmail)
+		private async Task<bool> VerifyCodeAsync(string Identifier, bool IsEmail)
 		{
-			VerifyCodeNavigationArgs navigationArgs = new(this, identifier);
+			VerifyCodeNavigationArgs navigationArgs = new(this, Identifier);
 			await ServiceRef.UiService.GoToAsync(nameof(VerifyCodePage), navigationArgs, BackMethod.Pop);
 			string? code = await navigationArgs.VarifyCode!.Task;
 
 			if (!string.IsNullOrEmpty(code))
 			{
-				Dictionary<string, object> parameters = new Dictionary<string, object>
+				Dictionary<string, object> parameters = new()
 				{
-					{ isEmail ? "EMail" : "Nr", identifier },
+					{ IsEmail ? "EMail" : "Nr", Identifier },
 					{ "Code", int.Parse(code, NumberStyles.None, CultureInfo.InvariantCulture) }
 				};
 
-				object verifyResult = await InternetContent.PostAsync(
+				ContentResponse Response = await InternetContent.PostAsync(
 					new Uri("https://" + Constants.Domains.IdDomain + "/ID/VerifyNumber.ws"),
 					parameters, new KeyValuePair<string, string>("Accept", "application/json"));
 
-				bool verified = verifyResult is Dictionary<string, object> verifyResponse &&
-									 verifyResponse.TryGetValue("Status", out object? obj) &&
-									 obj is bool status && status;
+				Response.AssertOk();
 
-				return verified;
+				bool Verified = Response.Decoded is Dictionary<string, object> VerifyResponse &&
+									 VerifyResponse.TryGetValue("Status", out object? Obj) &&
+									 Obj is bool Status &&
+									 Status;
+
+				return Verified;
 			}
 
 			return false;
@@ -356,12 +368,14 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 			{
 				try
 				{
-					KeyValuePair<byte[], string> P = await InternetContent.PostAsync(Uri, Encoding.ASCII.GetBytes(Code), "text/plain",
+					ContentBinaryResponse Response = await InternetContent.PostAsync(Uri, Encoding.ASCII.GetBytes(Code), "text/plain",
 						new KeyValuePair<string, string>("Accept", "text/plain"));
+					Response.AssertOk();
 
-					object Decoded = await InternetContent.DecodeAsync(P.Value, P.Key, Uri);
+					ContentResponse Decoded = await InternetContent.DecodeAsync(Response.ContentType, Response.Encoded, Uri);
+					Decoded.AssertOk();
 
-					EncryptedStr = (string)Decoded;
+					EncryptedStr = (string)Decoded.Decoded;
 				}
 				catch (Exception ex)
 				{

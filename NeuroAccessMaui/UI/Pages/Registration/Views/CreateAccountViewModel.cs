@@ -9,6 +9,7 @@ using NeuroAccessMaui.Services.Data;
 using NeuroAccessMaui.Services.Tag;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 
 namespace NeuroAccessMaui.UI.Pages.Registration.Views
 {

@@ -15,8 +15,10 @@ using NeuroAccessMaui.UI.Pages.Wallet.MyWallet;
 using NeuroAccessMaui.UI.Pages.Wallet.RequestPayment;
 using NeuroAccessMaui.UI.Pages.Wallet.ServiceProviders;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Persistence;
 
 namespace NeuroAccessMaui.UI.Pages.Applications.Applications

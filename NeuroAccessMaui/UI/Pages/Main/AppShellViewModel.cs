@@ -56,7 +56,7 @@ namespace NeuroAccessMaui.UI.Pages.Main
 			this.UpdateProperties();
 		}
 
-		private Task XmppService_ConnectionStateChanged(object Sender, Waher.Networking.XMPP.XmppState NewState)
+		private Task XmppService_ConnectionStateChanged(object _, Waher.Networking.XMPP.XmppState NewState)
 		{
 			if (NewState == Waher.Networking.XMPP.XmppState.Connected)
 				this.UpdateProperties();

@@ -24,6 +24,18 @@ namespace NeuroAccessMaui.UI.Rendering
 		}
 
 		/// <summary>
+		/// Generates a VerticalStackLayout from the markdown text.
+		/// </summary>
+		/// <param name="Document">Markdown document.</param>
+		/// <returns>VerticalStackLayout</returns>
+		public static Task<VerticalStackLayout?> GenerateMaui(this MarkdownDocument Document)
+		{
+			using MauiRenderer Renderer = new(Document);
+			Document.RenderDocument(Renderer);
+			return Task.FromResult(Renderer.Output());
+		}
+
+		/// <summary>
 		/// Generates Maui XAML from the markdown text.
 		/// </summary>
 		/// <param name="Document">Markdown document.</param>

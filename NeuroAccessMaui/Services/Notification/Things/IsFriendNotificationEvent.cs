@@ -2,6 +2,7 @@
 using NeuroAccessMaui.Services.Contacts;
 using NeuroAccessMaui.UI.Pages.Things.IsFriend;
 using Waher.Networking.XMPP.Provisioning;
+using Waher.Networking.XMPP.Provisioning.Events;
 
 namespace NeuroAccessMaui.Services.Notification.Things
 {

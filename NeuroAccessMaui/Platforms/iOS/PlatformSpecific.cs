@@ -25,7 +25,7 @@ namespace NeuroAccessMaui.Services
 		public PlatformSpecific()
 		{
 			NSNotificationCenter.DefaultCenter.AddObserver(UIKeyboard.WillShowNotification, this.OnKeyboardWillShow);
-            NSNotificationCenter.DefaultCenter.AddObserver(UIKeyboard.WillHideNotification, this.OnKeyboardWillHide);
+			NSNotificationCenter.DefaultCenter.AddObserver(UIKeyboard.WillHideNotification, this.OnKeyboardWillHide);
 		}
 
 		/// <summary>
@@ -411,23 +411,23 @@ namespace NeuroAccessMaui.Services
 		}
 
 		private void OnKeyboardWillShow(NSNotification notification)
-        {
-            CoreGraphics.CGRect keyboardFrame = UIKeyboard.FrameEndFromNotification(notification);
+		{
+			CoreGraphics.CGRect keyboardFrame = UIKeyboard.FrameEndFromNotification(notification);
 			float keyboardHeight = (float)keyboardFrame.Height;
-			KeyboardShown?.Invoke(this, new KeyboardSizeMessage(keyboardHeight));
-            KeyboardSizeChanged?.Invoke(this, new KeyboardSizeMessage(keyboardHeight));
+			KeyboardShown.Raise(this, new KeyboardSizeMessage(keyboardHeight));
+			KeyboardSizeChanged.Raise(this, new KeyboardSizeMessage(keyboardHeight));
 			WeakReferenceMessenger.Default.Send(new KeyboardSizeMessage(keyboardHeight));
-        }
+		}
 
-        private void OnKeyboardWillHide(NSNotification notification)
-        {
+		private void OnKeyboardWillHide(NSNotification notification)
+		{
 			float keyboardHeight = 0;
-			KeyboardShown?.Invoke(this, new KeyboardSizeMessage(keyboardHeight));
-            KeyboardSizeChanged?.Invoke(this, new KeyboardSizeMessage(keyboardHeight));
+			KeyboardShown.Raise(this, new KeyboardSizeMessage(keyboardHeight));
+			KeyboardSizeChanged.Raise(this, new KeyboardSizeMessage(keyboardHeight));
 			WeakReferenceMessenger.Default.Send(new KeyboardSizeMessage(keyboardHeight));
-        }
+		}
 
-	
+
 		#endregion
 
 	}

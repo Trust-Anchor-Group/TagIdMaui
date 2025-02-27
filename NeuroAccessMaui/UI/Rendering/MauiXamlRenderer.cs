@@ -765,7 +765,7 @@ namespace NeuroAccessMaui.UI.Rendering
 		#endregion
 
 		#region Block elements
-
+		
 		/// <summary>
 		/// Renders <paramref name="Element"/>.
 		/// </summary>
@@ -1005,7 +1005,7 @@ namespace NeuroAccessMaui.UI.Rendering
 				this.XmlOutput.WriteStartElement("Label");
 				this.XmlOutput.WriteAttributeString("LineBreakMode", "NoWrap");
 				this.RenderLabelAlignment();
-				this.XmlOutput.WriteAttributeString("FontFamily", "Courier New");
+				this.XmlOutput.WriteAttributeString("FontFamily", "SpaceGroteskRegular");
 				this.XmlOutput.WriteAttributeString("Text", Element.Rows[i]);
 				this.XmlOutput.WriteEndElement();
 			}
@@ -1560,7 +1560,7 @@ namespace NeuroAccessMaui.UI.Rendering
 				this.XmlOutput.WriteAttributeString("TextDecorations", "Underline");
 
 			if (this.Code)
-				this.XmlOutput.WriteAttributeString("FontFamily", "Courier New");
+				this.XmlOutput.WriteAttributeString("FontFamily", "SpaceGroteskRegular");
 
 			if (this.Hyperlink is not null)
 			{

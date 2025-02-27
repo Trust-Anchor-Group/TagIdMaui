@@ -1,4 +1,5 @@
-﻿using Waher.Networking.XMPP.Push;
+﻿using Waher.Events;
+using Waher.Networking.XMPP.Push;
 using Waher.Runtime.Inventory;
 
 namespace NeuroAccessMaui.Services.Push
@@ -27,7 +28,7 @@ namespace NeuroAccessMaui.Services.Push
 		/// <summary>
 		/// Event raised when a new token is made available.
 		/// </summary>
-		event TokenEventHandler OnNewToken;
+		event EventHandlerAsync<TokenEventArgs>? OnNewToken;
 
 		/// <summary>
 		/// Checks if the Push Notification Token is current and registered properly.

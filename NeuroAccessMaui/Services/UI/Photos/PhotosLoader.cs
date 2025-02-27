@@ -354,7 +354,7 @@ namespace NeuroAccessMaui.Services.UI.Photos
 
 			if (!File.Exists(FileName))
 			{
-				await Waher.Content.Resources.WriteAllBytesAsync(FileName, BinaryImage);
+				await Waher.Runtime.IO.Files.WriteAllBytesAsync(FileName, BinaryImage);
 
 				lock (synchObject)
 				{
@@ -374,7 +374,7 @@ namespace NeuroAccessMaui.Services.UI.Photos
 		private static Dictionary<string, bool>? temporaryFiles = null;
 		private static readonly object synchObject = new();
 
-		private static void CurrentDomain_ProcessExit(object? sender, EventArgs e)
+		private static Task CurrentDomain_ProcessExit(object? sender, EventArgs e)
 		{
 			lock (synchObject)
 			{
@@ -395,6 +395,8 @@ namespace NeuroAccessMaui.Services.UI.Photos
 					temporaryFiles.Clear();
 				}
 			}
+
+			return Task.CompletedTask;
 		}
 
 		#endregion
