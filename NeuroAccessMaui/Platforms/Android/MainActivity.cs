@@ -45,7 +45,7 @@ namespace NeuroAccessMaui
 				msg.AppendLine(ex.StackTrace);
 				msg.AppendLine("```");
 
-				App.SendAlert(msg.ToString(), "text/plain").Wait();
+				await App.SendAlertAsync(msg.ToString(), "text/plain");
 			}
 
 			App.Current?.On<Microsoft.Maui.Controls.PlatformConfiguration.Android>().UseWindowSoftInputModeAdjust(WindowSoftInputModeAdjust.Resize);
@@ -185,7 +185,7 @@ namespace NeuroAccessMaui
 			}
 			catch (Exception ex)
 			{
-				Waher.Events.Log.Critical(ex);
+				Waher.Events.Log.Exception(ex);
 				// TODO: Handle read & connection errors.
 			}
 		}

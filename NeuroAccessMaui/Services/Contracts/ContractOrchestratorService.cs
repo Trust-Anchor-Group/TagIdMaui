@@ -8,12 +8,15 @@ using NeuroAccessMaui.UI.Pages.Petitions.PetitionIdentity;
 using NeuroAccessMaui.UI.Pages.Petitions.PetitionPeerReview;
 using NeuroAccessMaui.UI.Pages.Petitions.PetitionSignature;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
+using System.Data;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
 using Waher.Content.Xml;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Networking.XMPP.StanzaErrors;
 using Waher.Persistence;
 using Waher.Persistence.Filters;
@@ -228,7 +231,7 @@ namespace NeuroAccessMaui.Services.Contracts
 
 					if (Identity is not null)
 					{
-						if (!await App.AuthenticateUser(AuthenticationPurpose.PetitionForSignatureReceived))
+						if (!await App.AuthenticateUserAsync(AuthenticationPurpose.PetitionForSignatureReceived))
 							return;
 
 						await ServiceRef.UiService.GoToAsync(nameof(PetitionSignaturePage), new PetitionSignatureNavigationArgs(
@@ -362,7 +365,8 @@ namespace NeuroAccessMaui.Services.Contracts
 		{
 			try
 			{
-				if (ServiceRef.XmppService.IsOnline && ServiceRef.TagProfile.IsCompleteOrWaitingForValidation())
+				if (ServiceRef.XmppService.IsOnline &&
+					ServiceRef.TagProfile.IsCompleteOrWaitingForValidation())
 				{
 					if (ServiceRef.TagProfile.LegalIdentity is not null)
 					{
@@ -460,7 +464,7 @@ namespace NeuroAccessMaui.Services.Contracts
 								ServiceRef.LogService.LogException(ex);
 							}
 
-							await App.Stop();
+							await App.StopAsync();
 							return;
 						}
 					}
@@ -666,7 +670,7 @@ namespace NeuroAccessMaui.Services.Contracts
 
 			string IdRef = ServiceRef.TagProfile.LegalIdentity?.Id ?? string.Empty;
 
-			if (!await App.AuthenticateUser(AuthenticationPurpose.TagSignature))
+			if (!await App.AuthenticateUserAsync(AuthenticationPurpose.TagSignature))
 				return;
 
 			StringBuilder Xml = new();

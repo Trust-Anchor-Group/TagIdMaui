@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,6 +15,7 @@ using NeuroAccessMaui.Services.Notification.Identities;
 using NeuroAccessMaui.UI.Pages.Identity.ViewIdentity;
 using NeuroAccessMaui.UI.Pages.Signatures.ClientSignature;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Persistence;
 using Waher.Persistence.Filters;
 
@@ -132,7 +133,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.ObjectModel
 				if (this.Signature is not null)
 					return this.Signature.BareJid;
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				ServiceRef.LogService.LogException(e);
 				//log and use fallback

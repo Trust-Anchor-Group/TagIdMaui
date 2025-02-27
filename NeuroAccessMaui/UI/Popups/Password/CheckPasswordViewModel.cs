@@ -63,7 +63,7 @@ namespace NeuroAccessMaui.UI.Popups.Password
 			{
 				string Password = this.PasswordText;
 
-				if (await App.CheckPasswordAndUnblockUser(Password))
+				if (await App.CheckPasswordAndUnblockUserAsync(Password))
 				{
 					await ServiceRef.UiService.PopAsync();
 					this.result.TrySetResult(Password);
@@ -72,14 +72,14 @@ namespace NeuroAccessMaui.UI.Popups.Password
 				{
 					this.PasswordText = string.Empty;
 
-					long PasswordAttemptCounter = await App.GetCurrentPasswordCounter();
+					long PasswordAttemptCounter = await App.GetCurrentPasswordCounterAsync();
 					long RemainingAttempts = Math.Max(0, Constants.Password.FirstMaxPasswordAttempts - PasswordAttemptCounter);
 
 					await ServiceRef.UiService.DisplayAlert(
 						ServiceRef.Localizer[nameof(AppResources.ErrorTitle)],
 						ServiceRef.Localizer[nameof(AppResources.PasswordIsInvalid), RemainingAttempts]);
 
-					await App.CheckUserBlocking();
+					await App.CheckUserBlockingAsync();
 				}
 			}
 		}
@@ -134,9 +134,9 @@ namespace NeuroAccessMaui.UI.Popups.Password
 	   		signature = Convert.ToBase64String(signatureBytes);
 	   	}
 
-	   	object result2 = await InternetContent.PostAsync(
+	   	ContentResponse result2 = await InternetContent.PostAsync(
 	   		new Uri("https://" + host + "/Agent/Account/Login"),
-	    new Dictionary<string, object>()
+				new Dictionary<string, object>()
 	   		{
 	   			{ "userName", ServiceRef.TagProfile.Account },
 	   			{ "nonce", nonce.ToString() },
@@ -147,15 +147,16 @@ namespace NeuroAccessMaui.UI.Popups.Password
 	   		new KeyValuePair<string, string>("Accept-Language", AcceptLanguage),
 	   		new KeyValuePair<string, string>("Accept-Encoding", "0")
 	   		);
+			result2.AssertOk();
 	   	string jwt = string.Empty;
-	   	if (result2 is Dictionary<string, object> Response)
+	   	if (result2.Decoded is Dictionary<string, object> Response)
 	   	{
 	   		if (Response.TryGetValue("jwt", out object? Obj) && Obj is string JWT)
 	   			jwt = JWT;
 	   	}
 	   	Console.WriteLine("JWT: " + jwt);
-	   	object result = await InternetContent.PostAsync(new Uri("https://" + host + "/Agent/Account/Recover"),
-	    new Dictionary<string, object>
+	   	ContentResponse result = await InternetContent.PostAsync(new Uri("https://" + host + "/Agent/Account/Recover"),
+				new Dictionary<string, object>
 	   		{
 	   			{ "country", ""},
 	   			{ "eMail", ServiceRef.TagProfile.EMail },
@@ -169,6 +170,7 @@ namespace NeuroAccessMaui.UI.Popups.Password
 	   			new KeyValuePair<string, string>("Authorization", "Bearer " + jwt)
 	   	);
 
+			result.AssertOk();
 	   }
 	   catch (Exception ex)
 	   {

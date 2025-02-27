@@ -1,4 +1,6 @@
-﻿namespace NeuroAccessMaui.Services
+﻿using Waher.Events;
+
+namespace NeuroAccessMaui.Services
 {
 	/// <inheritdoc/>
 	public class LoadableService : ILoadableService
@@ -127,7 +129,7 @@
 
 		private void OnLoaded(LoadedEventArgs e)
 		{
-			PrivLoaded?.Invoke(this, e);
+			PrivLoaded.Raise(this, e);
 		}
 	}
 }

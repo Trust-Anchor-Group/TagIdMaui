@@ -2499,4 +2499,22 @@
   <data name="GenerateQrCode" xml:space="preserve">
     <value>Luo QR-koodi</value>
   </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="CameraPermissionDescription" xml:space="preserve">
+    <value>Jos haluat käyttää tätä ominaisuutta, ota kameran käyttö käyttöön asetuksissasi.</value>
+  </data>
+  <data name="CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Avaa asetukset - Napsauta "Käyttöoikeudet" - Ota kameran käyttöoikeudet käyttöön</value>
+  </data>
+  <data name="iOS_CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Avaa asetukset - Ota kameran käyttöoikeudet käyttöön</value>
+  </data>
+  <data name="GoToSettings" xml:space="preserve">
+    <value>Avaa asetukset</value>
+  </data>
+  <data name="Skip" xml:space="preserve">
+    <value>Hyppiä</value>
+  </data>
 </root>

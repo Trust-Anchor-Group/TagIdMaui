@@ -2,6 +2,7 @@
 using NeuroAccessMaui.Services.Notification.Xmpp;
 using NeuroAccessMaui.UI;
 using Waher.Networking.XMPP.Provisioning;
+using Waher.Networking.XMPP.Provisioning.Events;
 
 namespace NeuroAccessMaui.Services.Notification.Things
 {

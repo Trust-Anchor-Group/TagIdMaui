@@ -56,7 +56,7 @@ namespace NeuroAccessMaui.UI.Pages.Main
 			this.UpdateProperties();
 		}
 
-		private Task XmppService_ConnectionStateChanged(object Sender, Waher.Networking.XMPP.XmppState NewState)
+		private Task XmppService_ConnectionStateChanged(object _, Waher.Networking.XMPP.XmppState NewState)
 		{
 			if (NewState == Waher.Networking.XMPP.XmppState.Connected)
 				this.UpdateProperties();
@@ -98,7 +98,7 @@ namespace NeuroAccessMaui.UI.Pages.Main
 			try
 			{
 				AppShell.Current.FlyoutIsPresented = false;
-				await App.Stop();
+				await App.StopAsync();
 			}
 			catch (Exception ex)
 			{
@@ -114,7 +114,7 @@ namespace NeuroAccessMaui.UI.Pages.Main
 		{
 			try
 			{
-				if (await App.AuthenticateUser(AuthenticationPurpose.ViewId))
+				if (await App.AuthenticateUserAsync(AuthenticationPurpose.ViewId))
 					await ServiceRef.UiService.GoToAsync(nameof(ViewIdentityPage));
 			}
 			catch (Exception ex)

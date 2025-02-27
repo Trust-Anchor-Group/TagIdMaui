@@ -1,5 +1,6 @@
 ﻿using NeuroAccessMaui.Resources.Languages;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using System.Text;
 
 namespace NeuroAccessMaui.Services.Notification.Wallet

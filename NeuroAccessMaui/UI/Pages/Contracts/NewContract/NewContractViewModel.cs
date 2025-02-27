@@ -1,18 +1,21 @@
+using CommunityToolkit.Maui.Layouts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NeuroAccessMaui.Extensions;
 using NeuroAccessMaui.Resources.Languages;
 using NeuroAccessMaui.Services;
+using NeuroAccessMaui.Services.Contacts;
+using NeuroAccessMaui.Services.UI;
+using NeuroAccessMaui.UI.Pages.Contracts.ViewContract;
 using NeuroAccessMaui.UI.Pages.Contracts.MyContracts.ObjectModels;
 using NeuroAccessMaui.UI.Pages.Contracts.NewContract.ObjectModel;
 using NeuroAccessMaui.UI.Pages.Contracts.ObjectModel;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Text;
+using Waher.Content;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Script;
-using CommunityToolkit.Maui.Layouts;
-using Waher.Content;
 using Waher.Persistence;
 using NeuroAccessMaui.Services.Contacts;
 using NeuroAccessMaui.UI.Pages.Contracts.ViewContract;
@@ -94,13 +97,13 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 		/// <summary>
 		/// A list of valid visibility items to choose from for this contract.
 		/// </summary>
-		public ObservableCollection<ContractVisibilityModel> ContractVisibilityItems { get; } = new()
-		  {
+		public ObservableCollection<ContractVisibilityModel> ContractVisibilityItems { get; } =
+		  [
 				new ContractVisibilityModel(ContractVisibility.CreatorAndParts, ServiceRef.Localizer[nameof(AppResources.ContractVisibility_CreatorAndParts)]),
 				new ContractVisibilityModel(ContractVisibility.DomainAndParts, ServiceRef.Localizer[nameof(AppResources.ContractVisibility_DomainAndParts)]),
 				new ContractVisibilityModel(ContractVisibility.Public, ServiceRef.Localizer[nameof(AppResources.ContractVisibility_Public)]),
 				new ContractVisibilityModel(ContractVisibility.PublicSearchable, ServiceRef.Localizer[nameof(AppResources.ContractVisibility_PublicSearchable)])
-		  };
+		  ];
 
 		/// <summary>
 		/// The selected contract visibility item.
@@ -314,11 +317,10 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 			try
 			{
 				// Populate the parameters
-				Variables v = new();
+				Variables v = [];
+
 				foreach (ObservableParameter p in this.EditableParameters)
-				{
 					p.Parameter.Populate(v);
-				}
 
 				await MainThread.InvokeOnMainThreadAsync(async () =>
 				{
@@ -356,7 +358,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 
 			await this.GoToState(NewContractStep.Loading);
 
-			if(!await App.AuthenticateUser(AuthenticationPurpose.SignContract, true))
+			if(!await App.AuthenticateUserAsync(AuthenticationPurpose.SignContract, true))
 			{
 				await this.GoToOverview();
 				return;
@@ -614,7 +616,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 			get
 			{
 				StringBuilder url = new();
-				bool first = true;
+				//bool first = true;
 
 				url.Append(Constants.UriSchemes.IotSc);
 				url.Append(':');
@@ -658,7 +660,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.NewContract
 		}
 
 		/// <inheritdoc/>
-		public Task<string> Title => ContractModel.GetName(this.Contract.Contract);
+		public Task<string> Title => ContractModel.GetName(this.Contract?.Contract);
 
 		/// <inheritdoc/>
 		public bool HasMedia => false;

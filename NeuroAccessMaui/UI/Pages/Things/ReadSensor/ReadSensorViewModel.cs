@@ -10,7 +10,9 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Events;
 using Waher.Networking.XMPP.PEP;
+using Waher.Networking.XMPP.PEP.Events;
 using Waher.Networking.XMPP.Sensor;
 using Waher.Things;
 using Waher.Things.SensorData;
@@ -71,9 +73,9 @@ namespace NeuroAccessMaui.UI.Pages.Things.ReadSensor
 			if (!string.IsNullOrEmpty(FullJid))
 			{
 				if (this.thingRef is null || this.thingRef.IsEmpty)
-					this.request = ServiceRef.XmppService.RequestSensorReadout(FullJid, FieldType.All);
+					this.request = await ServiceRef.XmppService.RequestSensorReadout(FullJid, FieldType.All);
 				else
-					this.request = ServiceRef.XmppService.RequestSensorReadout(FullJid, [this.thingRef], FieldType.All);
+					this.request = await ServiceRef.XmppService.RequestSensorReadout(FullJid, [this.thingRef], FieldType.All);
 
 				this.request.OnStateChanged += this.Request_OnStateChanged;
 				this.request.OnFieldsReceived += this.Request_OnFieldsReceived;

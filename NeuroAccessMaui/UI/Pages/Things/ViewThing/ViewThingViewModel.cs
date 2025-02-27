@@ -20,6 +20,7 @@ using Waher.Networking.XMPP.Concentrator;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Networking.XMPP.Control;
 using Waher.Networking.XMPP.DataForms;
+using Waher.Networking.XMPP.Events;
 using Waher.Networking.XMPP.Sensor;
 using Waher.Networking.XMPP.ServiceDiscovery;
 using Waher.Persistence;
@@ -532,7 +533,7 @@ namespace NeuroAccessMaui.UI.Pages.Things.ViewThing
 					return;
 				}
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.DeleteRules, true))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.DeleteRules, true))
 					return;
 
 				TaskCompletionSource<bool> Result = new();
@@ -582,7 +583,7 @@ namespace NeuroAccessMaui.UI.Pages.Things.ViewThing
 					return;
 				}
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.DisownThing, true))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.DisownThing, true))
 					return;
 
 				(bool Succeeded, bool Done) = await ServiceRef.NetworkService.TryRequest(() =>
@@ -628,7 +629,7 @@ namespace NeuroAccessMaui.UI.Pages.Things.ViewThing
 				return;
 			try
 			{
-				if (!await App.AuthenticateUser(AuthenticationPurpose.AddToListOfThings))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.AddToListOfThings))
 					return;
 
 				RosterItem? Item = ServiceRef.XmppService.GetRosterItem(this.thing.BareJid);
@@ -680,7 +681,7 @@ namespace NeuroAccessMaui.UI.Pages.Things.ViewThing
 
 			try
 			{
-				if (!await App.AuthenticateUser(AuthenticationPurpose.RemoveFromListOfThings))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.RemoveFromListOfThings))
 					return;
 
 				if (this.InContacts)
@@ -811,63 +812,65 @@ namespace NeuroAccessMaui.UI.Pages.Things.ViewThing
 			}
 		}
 
-		private void NotificationService_OnNotificationsDeleted(object? Sender, NotificationEventsArgs e)
+		private Task NotificationService_OnNotificationsDeleted(object? Sender, NotificationEventsArgs e)
 		{
-			if (this.thing is null)
-				return;
-
-			MainThread.BeginInvokeOnMainThread(() =>
+			if (this.thing is not null)
 			{
-				bool IsNode = this.IsNodeInConcentrator;
-				string Key = this.thing.ThingNotificationCategoryKey;
-				int NrChatMessagesRemoved = 0;
-
-				foreach (NotificationEvent Event in e.Events)
+				MainThread.BeginInvokeOnMainThread(() =>
 				{
-					switch (Event.Type)
+					bool IsNode = this.IsNodeInConcentrator;
+					string Key = this.thing.ThingNotificationCategoryKey;
+					int NrChatMessagesRemoved = 0;
+
+					foreach (NotificationEvent Event in e.Events)
 					{
-						case NotificationEventType.Contacts:
-							if (IsNode)
-								continue;
-
-							if (Event.Category != this.thing.BareJid)
-								continue;
-							break;
-
-						case NotificationEventType.Things:
-							if (Event.Category != Key)
-								continue;
-							break;
-
-						default:
-							continue;
-					}
-
-					int i = 0;
-
-					foreach (EventModel Model in this.Notifications)
-					{
-						if (Model.Event.ObjectId == Event.ObjectId)
+						switch (Event.Type)
 						{
-							this.Notifications.RemoveAt(i);
+							case NotificationEventType.Contacts:
+								if (IsNode)
+									continue;
 
-							if (Event.Type == NotificationEventType.Contacts)
-								NrChatMessagesRemoved++;
+								if (Event.Category != this.thing.BareJid)
+									continue;
+								break;
 
-							break;
+							case NotificationEventType.Things:
+								if (Event.Category != Key)
+									continue;
+								break;
+
+							default:
+								continue;
 						}
 
-						i++;
-					}
-				}
+						int i = 0;
 
-				this.NrPendingChatMessages -= NrChatMessagesRemoved;
-				this.HasNotifications = this.Notifications.Count > 0;
-				this.HasPendingChatMessages = this.NrPendingChatMessages > 0;
-			});
+						foreach (EventModel Model in this.Notifications)
+						{
+							if (Model.Event.ObjectId == Event.ObjectId)
+							{
+								this.Notifications.RemoveAt(i);
+
+								if (Event.Type == NotificationEventType.Contacts)
+									NrChatMessagesRemoved++;
+
+								break;
+							}
+
+							i++;
+						}
+					}
+
+					this.NrPendingChatMessages -= NrChatMessagesRemoved;
+					this.HasNotifications = this.Notifications.Count > 0;
+					this.HasPendingChatMessages = this.NrPendingChatMessages > 0;
+				});
+			}
+
+			return Task.CompletedTask;
 		}
 
-		private void NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
+		private Task NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
 		{
 			MainThread.BeginInvokeOnMainThread(async () =>
 			{
@@ -912,6 +915,8 @@ namespace NeuroAccessMaui.UI.Pages.Things.ViewThing
 					ServiceRef.LogService.LogException(ex);
 				}
 			});
+
+			return Task.CompletedTask;
 		}
 
 		private Task Xmpp_OnRosterItemRemoved(object? Sender, RosterItem Item)

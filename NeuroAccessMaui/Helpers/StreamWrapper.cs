@@ -1,4 +1,6 @@
-﻿namespace NeuroAccessMaui.Helpers
+﻿using Waher.Events;
+
+namespace NeuroAccessMaui.Helpers
 {
 	public sealed class StreamWrapper(Stream Wrapped, IDisposable? AdditionalDisposable) : Stream
 	{
@@ -32,7 +34,7 @@
 		{
 			this.wrapped.Dispose();
 
-			Disposed?.Invoke(this, EventArgs.Empty);
+			Disposed.Raise(this, EventArgs.Empty);
 
 			this.additionalDisposable?.Dispose();
 			this.additionalDisposable = null;

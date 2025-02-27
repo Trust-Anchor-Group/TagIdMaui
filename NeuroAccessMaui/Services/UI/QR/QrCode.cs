@@ -1,6 +1,8 @@
+using CommunityToolkit.Maui.Views;
 using NeuroAccessMaui.Extensions;
 using NeuroAccessMaui.Links;
 using NeuroAccessMaui.Resources.Languages;
+using NeuroAccessMaui.UI.Popups.Info;
 using NeuroAccessMaui.UI.Pages.Main.QR;
 using NeuroAccessMaui.UI.Pages.Main.Settings;
 using SkiaSharp;
@@ -158,6 +160,11 @@ namespace NeuroAccessMaui.Services.UI.QR
 		/// <returns>Decoded string</returns>
 		public static async Task<string?> ScanQrCode(string? QrTitle, string[] AllowedSchemas)
 		{
+			bool Permitted = await ServiceRef.PermissionService.CheckCameraPermissionAsync();
+
+			if (!Permitted)
+				return null;
+
 			ScanQrCodeNavigationArgs NavigationArgs = new(QrTitle, AllowedSchemas);
 
 			await ServiceRef.UiService.GoToAsync(nameof(ScanQrCodePage), NavigationArgs, BackMethod.Pop);

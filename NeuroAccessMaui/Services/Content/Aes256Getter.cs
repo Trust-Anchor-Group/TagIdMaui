@@ -22,7 +22,7 @@ namespace NeuroAccessMaui.Services.Content
 		/// <summary>
 		/// URI Schemes handled.
 		/// </summary>
-		public string[] UriSchemes => new string[] { Constants.UriSchemes.Aes256 };
+		public string[] UriSchemes => [Constants.UriSchemes.Aes256];
 
 		/// <summary>
 		/// How well the URI can be managed.
@@ -98,7 +98,7 @@ namespace NeuroAccessMaui.Services.Content
 		/// <param name="Headers">Additional headers</param>
 		/// <returns>Decrypted and decoded content.</returns>
 		/// <exception cref="ArgumentException">If URI cannot be parsed.</exception>
-		public Task<object> GetAsync(Uri Uri, X509Certificate Certificate, RemoteCertificateEventHandler RemoteCertificateValidator,
+		public Task<ContentResponse> GetAsync(Uri Uri, X509Certificate Certificate, RemoteCertificateEventHandler RemoteCertificateValidator,
 			params KeyValuePair<string, string>[] Headers)
 		{
 			return this.GetAsync(Uri, Certificate, RemoteCertificateValidator, 60000, Headers);
@@ -114,7 +114,7 @@ namespace NeuroAccessMaui.Services.Content
 		/// <param name="Headers">Additional headers</param>
 		/// <returns>Decrypted and decoded content.</returns>
 		/// <exception cref="ArgumentException">If URI cannot be parsed.</exception>
-		public async Task<object> GetAsync(Uri Uri, X509Certificate Certificate, RemoteCertificateEventHandler RemoteCertificateValidator,
+		public async Task<ContentResponse> GetAsync(Uri Uri, X509Certificate Certificate, RemoteCertificateEventHandler RemoteCertificateValidator,
 			int TimeoutMs, params KeyValuePair<string, string>[] Headers)
 		{
 			(string ContentType, byte[] Bin, Uri EncryptedUri) = await GetAndDecrypt(Uri, Certificate, RemoteCertificateValidator, TimeoutMs, Headers);
@@ -128,7 +128,10 @@ namespace NeuroAccessMaui.Services.Content
 			if (!TryParse(Uri, out byte[]? Key, out byte[]? IV, out string? ContentType, out Uri? EncryptedUri))
 				throw new ArgumentException("URI not supported.", nameof(Uri));
 
-			byte[] Bin = await InternetContent.GetAsync(EncryptedUri, Certificate, RemoteCertificateValidator, TimeoutMs, AcceptBinary(Headers)) as byte[]
+			ContentResponse Response = await InternetContent.GetAsync(EncryptedUri, Certificate, RemoteCertificateValidator, TimeoutMs, AcceptBinary(Headers));
+			Response.AssertOk();
+
+			byte[] Bin = Response.Decoded as byte[]
 				?? throw new IOException("Expected binary response.");
 
 			Aes Aes = Aes.Create();
@@ -169,10 +172,25 @@ namespace NeuroAccessMaui.Services.Content
 		/// <param name="RemoteCertificateValidator">Optional callback method for validating remote certificates.</param>
 		/// <param name="Headers">Optional headers. Interpreted in accordance with the corresponding URI scheme.</param>
 		/// <returns>Content-Type, together with a Temporary file, if resource has been downloaded, or null if resource is data-less.</returns>
-		public Task<KeyValuePair<string, TemporaryStream>> GetTempStreamAsync(Uri Uri, X509Certificate Certificate,
+		public Task<ContentStreamResponse> GetTempStreamAsync(Uri Uri, X509Certificate Certificate,
 			RemoteCertificateEventHandler RemoteCertificateValidator, params KeyValuePair<string, string>[] Headers)
 		{
 			return this.GetTempStreamAsync(Uri, Certificate, RemoteCertificateValidator, 60000, Headers);
+		}
+
+		/// <summary>
+		/// Gets a (possibly big) resource, using a Uniform Resource Identifier (or Locator).
+		/// </summary>
+		/// <param name="Uri">URI</param>
+		/// <param name="Certificate">Optional Client certificate to use in a Mutual TLS session.</param>
+		/// <param name="RemoteCertificateValidator">Optional validator of remote certificates.</param>
+		/// <param name="Destination">Optional destination. Content will be output to this stream. If not provided, a new temporary stream will be created.</param>
+		/// <param name="Headers">Optional headers. Interpreted in accordance with the corresponding URI scheme.</param>
+		/// <returns>Content-Type, together with a Temporary file, if resource has been downloaded, or null if resource is data-less.</returns>
+		public Task<ContentStreamResponse> GetTempStreamAsync(Uri Uri, X509Certificate Certificate,
+			RemoteCertificateEventHandler RemoteCertificateValidator, TemporaryStream Destination, params KeyValuePair<string, string>[] Headers)
+		{
+			return this.GetTempStreamAsync(Uri, Certificate, RemoteCertificateValidator, 60000, Destination, Headers);
 		}
 
 		/// <summary>
@@ -184,16 +202,34 @@ namespace NeuroAccessMaui.Services.Content
 		/// <param name="TimeoutMs">Timeout, in milliseconds. (Default=60000)</param>
 		/// <param name="Headers">Optional headers. Interpreted in accordance with the corresponding URI scheme.</param>
 		/// <returns>Content-Type, together with a Temporary file, if resource has been downloaded, or null if resource is data-less.</returns>
-		public async Task<KeyValuePair<string, TemporaryStream>> GetTempStreamAsync(Uri Uri, X509Certificate Certificate,
+		public Task<ContentStreamResponse> GetTempStreamAsync(Uri Uri, X509Certificate Certificate,
 			RemoteCertificateEventHandler RemoteCertificateValidator, int TimeoutMs, params KeyValuePair<string, string>[] Headers)
+		{
+			return this.GetTempStreamAsync(Uri, Certificate, RemoteCertificateValidator, TimeoutMs, null, Headers);
+		}
+
+		/// <summary>
+		/// Gets a (possibly big) resource, using a Uniform Resource Identifier (or Locator).
+		/// </summary>
+		/// <param name="Uri">URI</param>
+		/// <param name="Certificate">Optional Client certificate to use in a Mutual TLS session.</param>
+		/// <param name="RemoteCertificateValidator">Optional validator of remote certificates.</param>
+		/// <param name="TimeoutMs">Timeout, in milliseconds. (Default=60000)</param>
+		/// <param name="Destination">Optional destination. Content will be output to this stream. If not provided, a new temporary stream will be created.</param>
+		/// <param name="Headers">Optional headers. Interpreted in accordance with the corresponding URI scheme.</param>
+		/// <returns>Content-Type, together with a Temporary file, if resource has been downloaded, or null if resource is data-less.</returns>
+		public async Task<ContentStreamResponse> GetTempStreamAsync(Uri Uri, X509Certificate Certificate,
+			RemoteCertificateEventHandler RemoteCertificateValidator, int TimeoutMs, TemporaryStream? Destination,
+			params KeyValuePair<string, string>[] Headers)
 		{
 			(string ContentType, byte[] Bin, _) = await GetAndDecrypt(Uri, Certificate, RemoteCertificateValidator, TimeoutMs, Headers);
 
-			TemporaryStream Result = new();
-			await Result.WriteAsync(Bin, 0, Bin.Length);
-			Result.Position = 0;
+			Destination ??= new TemporaryStream();
+			await Destination.WriteAsync(Bin, 0, Bin.Length);
+			Destination.Position = 0;
 
-			return new KeyValuePair<string, TemporaryStream>(ContentType, Result);
+			return new ContentStreamResponse(ContentType, Destination);
 		}
+
 	}
 }

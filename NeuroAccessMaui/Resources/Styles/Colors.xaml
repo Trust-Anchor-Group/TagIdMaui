@@ -35,7 +35,6 @@
 	<Color x:Key="Purple15Light">#268F40D4</Color>
 	<Color x:Key="PurpleLight">#8F40D4</Color>
 
-
 	<!-- Pop ups -->
 	<Color x:Key="PopUpBodyWhiteLight">#FCFCFC</Color>
 	<Color x:Key="PopUpBackgroundLight">#DFE6E6E8</Color>

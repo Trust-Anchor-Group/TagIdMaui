@@ -127,7 +127,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.ChangePassword
 		{
 			if (!string.IsNullOrEmpty(this.OldPassword) && this.CanChangePassword)
 			{
-				if (await App.CheckPasswordAndUnblockUser(this.OldPassword))
+				if (await App.CheckPasswordAndUnblockUserAsync(this.OldPassword))
 				{
 					try
 					{
@@ -160,14 +160,14 @@ namespace NeuroAccessMaui.UI.Pages.Main.ChangePassword
 				{
 					this.OldPassword = string.Empty;
 
-					long PasswordAttemptCounter = await App.GetCurrentPasswordCounter();
+					long PasswordAttemptCounter = await App.GetCurrentPasswordCounterAsync();
 					long RemainingAttempts = Math.Max(0, Constants.Password.FirstMaxPasswordAttempts - PasswordAttemptCounter);
 
 					await ServiceRef.UiService.DisplayAlert(
 						ServiceRef.Localizer[nameof(AppResources.ErrorTitle)],
 						ServiceRef.Localizer[nameof(AppResources.PasswordIsInvalid), RemainingAttempts]);
 
-					await App.CheckUserBlocking();
+					await App.CheckUserBlockingAsync();
 				}
 			}
 		}

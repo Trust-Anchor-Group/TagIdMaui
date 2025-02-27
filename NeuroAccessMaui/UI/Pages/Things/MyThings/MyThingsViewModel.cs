@@ -10,6 +10,7 @@ using NeuroAccessMaui.UI.Pages.Contacts.MyContacts;
 using NeuroAccessMaui.UI.Pages.Things.ViewThing;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Events;
 using Waher.Networking.XMPP.Provisioning;
 using Waher.Persistence;
 using Waher.Persistence.Filters;
@@ -19,19 +20,12 @@ namespace NeuroAccessMaui.UI.Pages.Things.MyThings
 	/// <summary>
 	/// The view model to bind to when displaying the list of things.
 	/// </summary>
-	public partial class MyThingsViewModel : BaseViewModel
+	/// <param name="Args">Navigation arguments</param>
+	public partial class MyThingsViewModel(MyThingsNavigationArgs? Args)
+		: BaseViewModel
 	{
 		private readonly Dictionary<CaseInsensitiveString, List<ContactInfoModel>> byBareJid = [];
-		private TaskCompletionSource<ContactInfoModel?>? result;
-
-		/// <summary>
-		/// Creates an instance of the <see cref="MyThingsViewModel"/> class.
-		/// </summary>
-		/// <param name="Args">Navigation arguments</param>
-		public MyThingsViewModel(MyThingsNavigationArgs? Args)
-		{
-			this.result = Args?.ThingToShare;
-		}
+		private TaskCompletionSource<ContactInfoModel?>? result = Args?.ThingToShare;
 
 		/// <inheritdoc/>
 		protected override async Task OnInitialize()
@@ -304,7 +298,7 @@ namespace NeuroAccessMaui.UI.Pages.Things.MyThings
 			return Task.CompletedTask;
 		}
 
-		private void NotificationService_OnNotificationsDeleted(object? Sender, NotificationEventsArgs e)
+		private Task NotificationService_OnNotificationsDeleted(object? Sender, NotificationEventsArgs e)
 		{
 			MainThread.BeginInvokeOnMainThread(() =>
 			{
@@ -352,9 +346,11 @@ namespace NeuroAccessMaui.UI.Pages.Things.MyThings
 					}
 				}
 			});
+
+			return Task.CompletedTask;
 		}
 
-		private void NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
+		private Task NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
 		{
 			MainThread.BeginInvokeOnMainThread(() =>
 			{
@@ -404,6 +400,8 @@ namespace NeuroAccessMaui.UI.Pages.Things.MyThings
 					ServiceRef.LogService.LogException(ex);
 				}
 			});
+
+			return Task.CompletedTask;
 		}
 
 	}

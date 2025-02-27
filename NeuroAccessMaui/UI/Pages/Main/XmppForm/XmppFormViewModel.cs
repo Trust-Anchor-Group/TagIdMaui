@@ -70,7 +70,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.XmppForm
 		{
 			if (this.form is not null && this.form.CanCancel && !this.responseSent)
 			{
-				this.form.Cancel();
+				await this.form.Cancel();
 				this.responseSent = true;
 			}
 
@@ -125,7 +125,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.XmppForm
 			{
 				if (this.form is not null && this.form.CanSubmit && !this.responseSent)
 				{
-					this.form.Submit();
+					await this.form.Submit();
 					this.responseSent = true;
 
 					await this.GoBack();

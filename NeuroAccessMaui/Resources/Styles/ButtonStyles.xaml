@@ -9,7 +9,7 @@
 		<Setter Property="Stroke" Value="Transparent"/>
 		<Setter Property="Padding" Value="{StaticResource ButtonMediumMargins}" />
 		<Setter Property="StrokeShape">
-			<RoundRectangle CornerRadius="{StaticResource SmallCornerRadius}" />
+			<RoundRectangle CornerRadius="{StaticResource MediumCornerRadius}" />
 		</Setter>
 	</Style>
 
@@ -25,12 +25,16 @@
 		<Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource OffBlack50Light}, Dark={StaticResource OffWhite30Dark}}" />
 	</Style>
 
+	<Style x:Key="ButtonLabelBase" ApplyToDerivedTypes="True" TargetType="Label">
+		<Setter Property="FontFamily" Value="SpaceGroteskBold" />
+	</Style>
+
 	<!-- Primary -->
 	<Style x:Key="PrimaryButtonActiveBorder" TargetType="Border" BasedOn="{StaticResource ButtonBorderBase}">
 		<Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentActiveLight}, Dark={StaticResource AccentActiveDark}}" />
 	</Style>
 
-	<Style x:Key="PrimaryButtonActiveLabel" TargetType="Label">
+	<Style x:Key="PrimaryButtonActiveLabel" TargetType="Label" BasedOn="{StaticResource ButtonLabelBase}">
 		<Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OffWhiteLight}, Dark={StaticResource OffWhiteDark}}" />
 	</Style>
 
@@ -61,18 +65,17 @@
 
 	<!-- Secondary -->
 	<Style x:Key="SecondaryButtonActiveBorder" TargetType="Border" BasedOn="{StaticResource ButtonBorderBase}">
-		<Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentActiveLight}, Dark={StaticResource AccentActiveDark}}" />
-		<Setter Property="Stroke" Value="{AppThemeBinding Light='Transparent', Dark={StaticResource OffWhiteDark}}"/>
+		<Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Accent20Light}, Dark={StaticResource Elevation1BackgroundDark}}" />
 	</Style>
 
-	<Style x:Key="SecondaryButtonActiveLabel" TargetType="Label">
-		<Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentActiveLight}, Dark={StaticResource OffWhiteDark}}" />
+	<Style x:Key="SecondaryButtonActiveLabel" TargetType="Label" BasedOn="{StaticResource ButtonLabelBase}">
+		<Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentActiveLight}, Dark={StaticResource AccentActiveDark}}" />
 	</Style>
 
 	<Style x:Key="SecondaryPath" TargetType="Path">
 		<Setter Property="Fill" Value="{AppThemeBinding Light={StaticResource AccentActiveLight}, Dark={StaticResource OffWhiteDark}}" />
 	</Style>
-	
+
 	<Style x:Key="SecondaryButton" TargetType="controls:TextButton">
 		<Setter Property="VisualStateManager.VisualStateGroups">
 			<VisualStateGroupList>

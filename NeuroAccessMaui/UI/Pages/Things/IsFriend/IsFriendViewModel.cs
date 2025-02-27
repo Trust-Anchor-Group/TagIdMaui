@@ -8,6 +8,7 @@ using NeuroAccessMaui.UI.Pages.Things.ViewClaimThing;
 using System.Collections.ObjectModel;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Events;
 using Waher.Networking.XMPP.Provisioning;
 using Waher.Persistence;
 

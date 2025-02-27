@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Waher.Events;
 using Waher.Persistence;
 using Waher.Runtime.Inventory;
 
@@ -79,12 +80,12 @@ namespace NeuroAccessMaui.Services.Notification
 		/// <summary>
 		/// Event raised when a new notification has been logged.
 		/// </summary>
-		event NotificationEventHandler OnNewNotification;
+		event EventHandlerAsync<NotificationEventArgs>? OnNewNotification;
 
 		/// <summary>
 		/// Event raised when notifications have been deleted.
 		/// </summary>
-		event NotificationEventsHandler OnNotificationsDeleted;
+		event EventHandlerAsync<NotificationEventsArgs>? OnNotificationsDeleted;
 
 		/// <summary>
 		/// Number of notifications but button Contacts

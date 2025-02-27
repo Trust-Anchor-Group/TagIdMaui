@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BaseContentPage
+    x:Class="NeuroAccessMaui.UI.Pages.Utility.Images.ImageCroppingPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:NeuroAccessMaui.UI.Pages"
+    xmlns:controls="clr-namespace:NeuroAccessMaui.UI.Controls"
+    xmlns:viewmodel="clr-namespace:NeuroAccessMaui.UI.Pages.Utility.Images"
+	xmlns:ui="clr-namespace:NeuroAccessMaui.UI"
+	xmlns:l="clr-namespace:NeuroAccessMaui.Services.Localization"
+    x:DataType="viewmodel:ImageCroppingViewModel">
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto,*,Auto">
+        <!--  Top Bar  -->
+        <Grid Grid.Row="0" Padding="10">
+            <Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+			<controls:ImageButton Grid.Column="0" HorizontalOptions="Start" Command="{Binding CancelCommand }" Style="{StaticResource FilledImageButton}"
+								PathData="{x:Static ui:Geometries.BackButtonPath}" />
+            <!--  rotation button -->
+			<controls:ImageButton
+				AutomationId="RotateImageButton"
+                Grid.Column="2"
+				Command="{Binding RotateCommand}"
+				Style="{StaticResource FilledImageButton}"
+				PathData="{x:Static ui:Geometries.FlipCameraPath}" />
+		</Grid>
+
+        <!--  Image Cropper  -->
+        <controls:ImageCropperView
+            x:Name="ImageCropperView"
+            Grid.Row="1"
+            CropMode="Aspect"
+            OutputMaxResolution="800,800" />
+
+        <Border Grid.Row="2" Style="{StaticResource BottomBarBorder}">
+            <Grid HorizontalOptions="Fill" VerticalOptions="Center" ColumnSpacing="{StaticResource SmallSpacing}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <controls:TextButton
+                    Grid.Column="0"
+                    Command="{Binding CancelCommand}"
+                    LabelData="{l:Localize Cancel}"
+                    Style="{StaticResource FilledTextButton}" />
+                <controls:TextButton
+                    Grid.Column="1"
+                    Command="{Binding CropCommand}"
+                    LabelData="{l:Localize Continue}"
+                    Style="{StaticResource FilledTextButton}" />
+            </Grid>
+        </Border>
+    </Grid>
+</base:BaseContentPage>

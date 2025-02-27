@@ -1,20 +1,28 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Xml;
-using EDaler;
+﻿using EDaler;
+using EDaler.Events;
 using EDaler.Uris;
 using NeuroAccessMaui.Services.Push;
 using NeuroAccessMaui.Services.Wallet;
 using NeuroAccessMaui.UI.Pages.Registration;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using NeuroFeatures.Events;
+using System.Data;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Xml;
 using Waher.Content;
+using Waher.Events;
+using Waher.Networking;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Networking.XMPP.DataForms;
+using Waher.Networking.XMPP.Events;
 using Waher.Networking.XMPP.HttpFileUpload;
-using Waher.Networking.XMPP.PEP;
+using Waher.Networking.XMPP.PEP.Events;
 using Waher.Networking.XMPP.Provisioning;
+using Waher.Networking.XMPP.Provisioning.Events;
 using Waher.Networking.XMPP.Provisioning.SearchOperators;
 using Waher.Networking.XMPP.Push;
 using Waher.Networking.XMPP.Sensor;
@@ -50,7 +58,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// An event that triggers whenever the connection state to the XMPP server changes.
 		/// </summary>
-		event StateChangedEventHandler? ConnectionStateChanged;
+		event EventHandlerAsync<XmppState> ConnectionStateChanged;
 
 		#endregion
 
@@ -210,7 +218,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="State">State object to pass on to the callback method.</param>
 		public void SendMessage(QoSLevel QoS, MessageType Type, string Id, string To, string CustomXml,
 			string Body, string Subject, string Language, string ThreadId, string ParentThreadId,
-			DeliveryEventHandler? DeliveryCallback, object? State);
+			EventHandlerAsync<DeliveryEventArgs>? DeliveryCallback, object? State);
 
 		#endregion
 
@@ -219,7 +227,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// Event raised when a new presence stanza has been received.
 		/// </summary>
-		event PresenceEventHandlerAsync? OnPresence;
+		event EventHandlerAsync<PresenceEventArgs> OnPresence;
 
 		/// <summary>
 		/// Requests subscription of presence information from a contact.
@@ -277,17 +285,17 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// Event raised when a roster item has been added to the roster.
 		/// </summary>
-		event RosterItemEventHandlerAsync? OnRosterItemAdded;
+		event EventHandlerAsync<RosterItem> OnRosterItemAdded;
 
 		/// <summary>
 		/// Event raised when a roster item has been updated in the roster.
 		/// </summary>
-		event RosterItemEventHandlerAsync? OnRosterItemUpdated;
+		event EventHandlerAsync<RosterItem> OnRosterItemUpdated;
 
 		/// <summary>
 		/// Event raised when a roster item has been removed from the roster.
 		/// </summary>
-		event RosterItemEventHandlerAsync? OnRosterItemRemoved;
+		event EventHandlerAsync<RosterItem> OnRosterItemRemoved;
 
 		#endregion
 
@@ -381,7 +389,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// </summary>
 		/// <param name="PersonalEventType">Type of personal event.</param>
 		/// <param name="Handler">Event handler.</param>
-		void RegisterPepHandler(Type PersonalEventType, PersonalEventNotificationEventHandler Handler);
+		void RegisterPepHandler(Type PersonalEventType, EventHandlerAsync<PersonalEventNotificationEventArgs> Handler);
 
 		/// <summary>
 		/// Unregisters an event handler of a specific type of personal events.
@@ -389,7 +397,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="PersonalEventType">Type of personal event.</param>
 		/// <param name="Handler">Event handler.</param>
 		/// <returns>If the event handler was found and removed.</returns>
-		bool UnregisterPepHandler(Type PersonalEventType, PersonalEventNotificationEventHandler Handler);
+		bool UnregisterPepHandler(Type PersonalEventType, EventHandlerAsync<PersonalEventNotificationEventArgs> Handler);
 
 		#endregion
 
@@ -590,22 +598,22 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// An event that fires when a legal identity changes.
 		/// </summary>
-		event LegalIdentityEventHandler? LegalIdentityChanged;
+		event EventHandlerAsync<LegalIdentityEventArgs> LegalIdentityChanged;
 
 		/// <summary>
 		/// An event that fires when an ID Application has changed.
 		/// </summary>
-		public event LegalIdentityEventHandler? IdentityApplicationChanged;
+		event EventHandlerAsync<LegalIdentityEventArgs> IdentityApplicationChanged;
 
 		/// <summary>
 		/// An event that fires when a petition for an identity is received.
 		/// </summary>
-		event LegalIdentityPetitionEventHandler? PetitionForIdentityReceived;
+		event EventHandlerAsync<LegalIdentityPetitionEventArgs> PetitionForIdentityReceived;
 
 		/// <summary>
 		/// An event that fires when a petitioned identity response is received.
 		/// </summary>
-		event LegalIdentityPetitionResponseEventHandler? PetitionedIdentityResponseReceived;
+		event EventHandlerAsync<LegalIdentityPetitionResponseEventArgs> PetitionedIdentityResponseReceived;
 
 		/// <summary>
 		/// Exports Keys to XML.
@@ -726,27 +734,27 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// Event raised when a contract proposal has been received.
 		/// </summary>
-		event ContractProposalEventHandler ContractProposalReceived;
+		event EventHandlerAsync<ContractProposalEventArgs> ContractProposalReceived;
 
 		/// <summary>
 		/// Event raised when contract was updated.
 		/// </summary>
-		event ContractReferenceEventHandler ContractUpdated;
+		event EventHandlerAsync<ContractReferenceEventArgs> ContractUpdated;
 
 		/// <summary>
 		/// Event raised when contract was signed.
 		/// </summary>
-		event ContractSignedEventHandler ContractSigned;
+		event EventHandlerAsync<ContractSignedEventArgs> ContractSigned;
 
 		/// <summary>
 		/// An event that fires when a petition for a contract is received.
 		/// </summary>
-		event ContractPetitionEventHandler PetitionForContractReceived;
+		event EventHandlerAsync<ContractPetitionEventArgs> PetitionForContractReceived;
 
 		/// <summary>
 		/// An event that fires when a petitioned contract response is received.
 		/// </summary>
-		event ContractPetitionResponseEventHandler PetitionedContractResponseReceived;
+		event EventHandlerAsync<ContractPetitionResponseEventArgs> PetitionedContractResponseReceived;
 
 		/// <summary>
 		/// Gets the timestamp of the last event received for a given contract ID.
@@ -802,12 +810,12 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// An event that fires when a petition for peer review is received.
 		/// </summary>
-		event SignaturePetitionEventHandler? PetitionForPeerReviewIdReceived;
+		event EventHandlerAsync<SignaturePetitionEventArgs> PetitionForPeerReviewIdReceived;
 
 		/// <summary>
 		/// An event that fires when a petitioned peer review response is received.
 		/// </summary>
-		event SignaturePetitionResponseEventHandler? PetitionedPeerReviewIdResponseReceived;
+		event EventHandlerAsync<SignaturePetitionResponseEventArgs> PetitionedPeerReviewIdResponseReceived;
 
 		/// <summary>
 		/// Gets available service providers for buying eDaler.
@@ -861,12 +869,12 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// An event that fires when a petition for a signature is received.
 		/// </summary>
-		event SignaturePetitionEventHandler? PetitionForSignatureReceived;
+		event EventHandlerAsync<SignaturePetitionEventArgs> PetitionForSignatureReceived;
 
 		/// <summary>
 		/// Event raised when a response to a signature petition has been received.
 		/// </summary>
-		event SignaturePetitionResponseEventHandler? SignaturePetitionResponseReceived;
+		event EventHandlerAsync<SignaturePetitionResponseEventArgs> SignaturePetitionResponseReceived;
 
 		#endregion
 
@@ -889,7 +897,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void IsFriendResponse(string ProvisioningServiceJID, string JID, string RemoteJID, string Key, bool IsFriend,
-			RuleRange Range, IqResultEventHandlerAsync Callback, object? State);
+			RuleRange Range, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Control" question, for all future requests.
@@ -904,7 +912,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanControlResponseAll(string ProvisioningServiceJID, string JID, string RemoteJID, string Key, bool CanControl,
-			string[]? ParameterNames, IThingReference Node, IqResultEventHandlerAsync Callback, object? State);
+			string[]? ParameterNames, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Control" question, based on the JID of the caller.
@@ -919,7 +927,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanControlResponseCaller(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanControl, string[]? ParameterNames, IThingReference Node, IqResultEventHandlerAsync Callback, object? State);
+			bool CanControl, string[]? ParameterNames, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Control" question, based on the domain of the caller.
@@ -934,7 +942,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanControlResponseDomain(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanControl, string[]? ParameterNames, IThingReference Node, IqResultEventHandlerAsync Callback, object? State);
+			bool CanControl, string[]? ParameterNames, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Control" question, based on a device token.
@@ -950,7 +958,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanControlResponseDevice(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanControl, string[]? ParameterNames, string Token, IThingReference Node, IqResultEventHandlerAsync Callback,
+			bool CanControl, string[]? ParameterNames, string Token, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback,
 			object? State);
 
 		/// <summary>
@@ -967,7 +975,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanControlResponseService(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanControl, string[]? ParameterNames, string Token, IThingReference Node, IqResultEventHandlerAsync Callback,
+			bool CanControl, string[]? ParameterNames, string Token, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback,
 			object? State);
 
 		/// <summary>
@@ -984,7 +992,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanControlResponseUser(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanControl, string[]? ParameterNames, string Token, IThingReference Node, IqResultEventHandlerAsync Callback,
+			bool CanControl, string[]? ParameterNames, string Token, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback,
 			object? State);
 
 		/// <summary>
@@ -1001,7 +1009,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanReadResponseAll(string ProvisioningServiceJID, string JID, string RemoteJID, string Key, bool CanRead,
-			FieldType FieldTypes, string[]? FieldNames, IThingReference Node, IqResultEventHandlerAsync Callback, object? State);
+			FieldType FieldTypes, string[]? FieldNames, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Read" question, based on the JID of the caller.
@@ -1017,7 +1025,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanReadResponseCaller(string ProvisioningServiceJID, string JID, string RemoteJID, string Key, bool CanRead,
-			FieldType FieldTypes, string[]? FieldNames, IThingReference Node, IqResultEventHandlerAsync Callback, object? State);
+			FieldType FieldTypes, string[]? FieldNames, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Read" question, based on the domain of the caller.
@@ -1033,7 +1041,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanReadResponseDomain(string ProvisioningServiceJID, string JID, string RemoteJID, string Key, bool CanRead,
-			FieldType FieldTypes, string[]? FieldNames, IThingReference Node, IqResultEventHandlerAsync Callback, object? State);
+			FieldType FieldTypes, string[]? FieldNames, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Sends a response to a previous "Can Read" question, based on a device token.
@@ -1050,7 +1058,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanReadResponseDevice(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanRead, FieldType FieldTypes, string[]? FieldNames, string Token, IThingReference Node, IqResultEventHandlerAsync Callback,
+			bool CanRead, FieldType FieldTypes, string[]? FieldNames, string Token, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback,
 			object? State);
 
 		/// <summary>
@@ -1068,7 +1076,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanReadResponseService(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanRead, FieldType FieldTypes, string[]? FieldNames, string Token, IThingReference Node, IqResultEventHandlerAsync Callback,
+			bool CanRead, FieldType FieldTypes, string[]? FieldNames, string Token, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback,
 			object? State);
 
 		/// <summary>
@@ -1086,7 +1094,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Optional callback method to call, when response to request has been received.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void CanReadResponseUser(string ProvisioningServiceJID, string JID, string RemoteJID, string Key,
-			bool CanRead, FieldType FieldTypes, string[]? FieldNames, string Token, IThingReference Node, IqResultEventHandlerAsync Callback,
+			bool CanRead, FieldType FieldTypes, string[]? FieldNames, string Token, IThingReference Node, EventHandlerAsync<IqResultEventArgs> Callback,
 			object? State);
 
 		/// <summary>
@@ -1100,7 +1108,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Method to call when response is returned.</param>
 		/// <param name="State">State object to pass on to callback method.</param>
 		void DeleteDeviceRules(string ServiceJID, string DeviceJID, string NodeId, string SourceId, string Partition,
-			IqResultEventHandlerAsync Callback, object? State);
+			EventHandlerAsync<IqResultEventArgs> Callback, object? State);
 
 		/// <summary>
 		/// Gets the certificate the corresponds to a token. This certificate can be used
@@ -1110,7 +1118,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Token">Token corresponding to the requested certificate.</param>
 		/// <param name="Callback">Callback method called, when certificate is available.</param>
 		/// <param name="State">State object that will be passed on to the callback method.</param>
-		void GetCertificate(string Token, CertificateCallback Callback, object? State);
+		void GetCertificate(string Token, EventHandlerAsync<CertificateEventArgs> Callback, object? State);
 
 		#endregion
 
@@ -1138,7 +1146,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Callback">Method to call when response is returned.</param>
 		/// <param name="State">State object.</param>
 		/// <param name="Nodes">Node references</param>
-		void GetControlForm(string To, string Language, DataFormResultEventHandler Callback, object? State,
+		void GetControlForm(string To, string Language, EventHandlerAsync<DataFormEventArgs> Callback, object? State,
 			params ThingReference[] Nodes);
 
 		/// <summary>
@@ -1147,7 +1155,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Destination">JID of sensor to read.</param>
 		/// <param name="Types">Field Types to read.</param>
 		/// <returns>Request object maintaining the current status of the request.</returns>
-		SensorDataClientRequest RequestSensorReadout(string Destination, FieldType Types);
+		Task<SensorDataClientRequest> RequestSensorReadout(string Destination, FieldType Types);
 
 		/// <summary>
 		/// Requests a sensor data readout.
@@ -1156,7 +1164,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <param name="Nodes">Array of nodes to read. Can be null or empty, if reading a sensor that is not a concentrator.</param>
 		/// <param name="Types">Field Types to read.</param>
 		/// <returns>Request object maintaining the current status of the request.</returns>
-		SensorDataClientRequest RequestSensorReadout(string Destination, ThingReference[] Nodes, FieldType Types);
+		Task<SensorDataClientRequest> RequestSensorReadout(string Destination, ThingReference[] Nodes, FieldType Types);
 
 		#endregion
 
@@ -1191,7 +1199,7 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// Event raised when balance has been updated.
 		/// </summary>
-		event BalanceEventHandler EDalerBalanceUpdated;
+		event EventHandlerAsync<BalanceEventArgs> EDalerBalanceUpdated;
 
 		/// <summary>
 		/// Gets account events available for the wallet.
@@ -1414,22 +1422,22 @@ namespace NeuroAccessMaui.Services.Xmpp
 		/// <summary>
 		/// Event raised when a token has been removed from the wallet.
 		/// </summary>
-		event NeuroFeatures.TokenEventHandler NeuroFeatureRemoved;
+		event EventHandlerAsync<NeuroFeatures.EventArguments.TokenEventArgs> NeuroFeatureRemoved;
 
 		/// <summary>
 		/// Event raised when a token has been added to the wallet.
 		/// </summary>
-		event NeuroFeatures.TokenEventHandler NeuroFeatureAdded;
+		event EventHandlerAsync<NeuroFeatures.EventArguments.TokenEventArgs> NeuroFeatureAdded;
 
 		/// <summary>
 		/// Event raised when variables have been updated in a state-machine.
 		/// </summary>
-		event VariablesUpdatedEventHandler NeuroFeatureVariablesUpdated;
+		event EventHandlerAsync<VariablesUpdatedEventArgs> NeuroFeatureVariablesUpdated;
 
 		/// <summary>
 		/// Event raised when a state-machine has received a new state.
 		/// </summary>
-		event NewStateEventHandler NeuroFeatureStateUpdated;
+		event EventHandlerAsync<NewStateEventArgs>? NeuroFeatureStateUpdated;
 
 		/// <summary>
 		/// Timepoint of last Neuro-Feature token event.

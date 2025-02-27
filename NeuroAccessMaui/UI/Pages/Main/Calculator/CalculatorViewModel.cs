@@ -77,7 +77,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Calculator
 					this.HasValue = !string.IsNullOrEmpty(this.Value);
 
 					if (this.Entry is not null)
-						this.Entry.EntryData = this.Value;
+						this.Entry.EntryData = this.Value ?? string.Empty;
 
 					if (this.ViewModel is not null && this.Property is not null)
 						this.ViewModel.SetValue(this.Property, this.Value);

@@ -1353,9 +1353,6 @@
   <data name="AccessRequest" xml:space="preserve">
     <value>Begäran om åtkomst</value>
   </data>
-  <data name="AccessRequestText2" xml:space="preserve">
-    <value>En förfrågan om att komma åt en av dina saker har mottagits. Välj hur du vill att saken ska svara på denna typ av förfrågan.</value>
-  </data>
   <data name="ContractCreated" xml:space="preserve">
     <value>Ett kontrakt har skapats.</value>
   </data>
@@ -1409,6 +1406,9 @@
   </data>
   <data name="AccessRequestText" xml:space="preserve">
     <value>{0} vill ansluta till din enhet {1}.</value>
+  </data>
+  <data name="AccessRequestText2" xml:space="preserve">
+    <value>En förfrågan om att komma åt en av dina saker har mottagits. Välj hur du vill att saken ska svara på denna typ av förfrågan.</value>
   </data>
   <data name="ConcentratorServiceNotFound" xml:space="preserve">
     <value>Ingen koncentratortjänst hittades.</value>
@@ -2150,19 +2150,19 @@
   </data>
   <data name="OnboardingGetStartedTitle" xml:space="preserve">
     <value>Välkommen till Neuro-Access</value>
-  </data> 
-  <data name="CreateNewAccount">
+  </data>
+  <data name="CreateNewAccount" xml:space="preserve">
     <value>Skapa nytt konto</value>
   </data>
-  <data name="IAlreadyHaveAnAccount">
+  <data name="IAlreadyHaveAnAccount" xml:space="preserve">
     <value>Jag har redan ett konto</value>
   </data>
-  <data name="OnboardingGetStartedQrInfo">
+  <data name="OnboardingGetStartedQrInfo" xml:space="preserve">
     <value>Har du fått en inbjudan, överförings- eller återställningskod? Skanna den nedan</value>
   </data>
   <data name="OnboardingNameEntryTitle" xml:space="preserve">
     <value>Välj ditt användarnamn</value>
-  </data> 
+  </data>
   <data name="OnboardingNameEntryDetails" xml:space="preserve">
     <value>Ditt användarnamn är permanent och kan inte ändras senare</value>
   </data>
@@ -2498,5 +2498,23 @@
   </data>
   <data name="GenerateQrCode" xml:space="preserve">
     <value>Generera QR-kod</value>
+  </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="CameraPermissionDescription" xml:space="preserve">
+    <value>För att använda denna funktion, vänligen aktivera kameratillgång i dina inställningar.</value>
+  </data>
+  <data name="CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Öppna inställningar - Klicka på "Behörigheter" - Aktivera kamerabehörigheter</value>
+  </data>
+  <data name="iOS_CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Öppna inställningar - Aktivera kamerabehörigheter</value>
+	</data>
+  <data name="GoToSettings" xml:space="preserve">
+    <value>Öppna inställningar</value>
+  </data>
+  <data name="Skip" xml:space="preserve">
+    <value>Hoppa över</value>
   </data>
 </root>

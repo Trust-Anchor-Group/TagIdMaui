@@ -1,6 +1,7 @@
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Shapes;
+using Waher.Events;
 using Path = Microsoft.Maui.Controls.Shapes.Path;
 
 namespace NeuroAccessMaui.UI.Controls
@@ -308,7 +309,7 @@ namespace NeuroAccessMaui.UI.Controls
 
 		private void OnEntryTextChanged(object? sender, TextChangedEventArgs e)
 		{
-			TextChanged?.Invoke(this, e);
+			TextChanged.Raise(this, e);
 		}
 
 		/// <summary>
@@ -317,26 +318,26 @@ namespace NeuroAccessMaui.UI.Controls
 		/// </summary>
 		private void OnEntryCompleted(object? sender, EventArgs e)
 		{
-			Completed?.Invoke(this, e);
+			Completed.Raise(this, e);
 		}
 
 		/// <summary>
 		/// Handles the <see cref="VisualElement.Focused"/> event.
-		/// Executes the <see cref="FocusedCommand"/> if it can execute.
+		/// Executes the <see cref="Focused"/> if it can execute.
 		/// </summary>
 		private void OnEntryFocused(object? sender, FocusEventArgs e)
 		{
-			Focused?.Invoke(this, e);
+			Focused.Raise(this, e);
 
 		}
 
 		/// <summary>
 		/// Handles the <see cref="VisualElement.Unfocused"/> event.
-		/// Executes the <see cref="UnfocusedCommand"/> if it can execute.
+		/// Executes the <see cref="Unfocused"/> if it can execute.
 		/// </summary>
 		private void OnEntryUnfocused(object? sender, FocusEventArgs e)
 		{
-			Unfocused?.Invoke(this, e);
+			Unfocused.Raise(this, e);
 		}
 
 		#endregion

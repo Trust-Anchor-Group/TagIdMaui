@@ -15,8 +15,10 @@ using NeuroAccessMaui.UI.Pages.Wallet.MyWallet;
 using NeuroAccessMaui.UI.Pages.Wallet.RequestPayment;
 using NeuroAccessMaui.UI.Pages.Wallet.ServiceProviders;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Persistence;
 
 namespace NeuroAccessMaui.UI.Pages.Applications.Applications
@@ -169,7 +171,7 @@ namespace NeuroAccessMaui.UI.Pages.Applications.Applications
 				if (ServiceRef.TagProfile.IdentityApplication is null)
 					return;
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.ViewId))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ViewId))
 					return;
 
 				await ServiceRef.UiService.GoToAsync(nameof(ApplyIdPage));
@@ -186,7 +188,7 @@ namespace NeuroAccessMaui.UI.Pages.Applications.Applications
 		{
 			try
 			{
-				if (!await App.AuthenticateUser(AuthenticationPurpose.ApplyForPersonalId))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ApplyForPersonalId))
 					return;
 
 				await ServiceRef.UiService.GoToAsync(nameof(ApplyIdPage), new ApplyIdNavigationArgs(true, false));
@@ -203,7 +205,7 @@ namespace NeuroAccessMaui.UI.Pages.Applications.Applications
 		{
 			try
 			{
-				if (!await App.AuthenticateUser(AuthenticationPurpose.ApplyForOrganizationalId))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ApplyForOrganizationalId))
 					return;
 
 				await ServiceRef.UiService.GoToAsync(nameof(ApplyIdPage), new ApplyIdNavigationArgs(false, false));
@@ -247,7 +249,7 @@ namespace NeuroAccessMaui.UI.Pages.Applications.Applications
 					if (ServiceProvider is null)
 						return;
 
-					if (!await App.AuthenticateUser(AuthenticationPurpose.ApplyForOrganizationalId))
+					if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ApplyForOrganizationalId))
 						return;
 
 					if (string.IsNullOrEmpty(ServiceProvider.Id))

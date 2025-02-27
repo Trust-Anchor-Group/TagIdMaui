@@ -2499,4 +2499,22 @@
   <data name="GenerateQrCode" xml:space="preserve">
     <value>Сгенерировать QR-код</value>
   </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Фотоаппарат</value>
+  </data>
+  <data name="CameraPermissionDescription" xml:space="preserve">
+    <value>Чтобы использовать эту функцию, включите доступ к камере в настройках.</value>
+  </data>
+  <data name="CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Откройте настройки - Нажмите на "Разрешения" - Включите разрешения камеры</value>
+  </data>
+  <data name="iOS_CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Откройте настройки - Включить разрешения камеры</value>
+  </data>
+  <data name="GoToSettings" xml:space="preserve">
+    <value>Откройте настройки</value>
+  </data>
+  <data name="Skip" xml:space="preserve">
+    <value>Скип</value>
+  </data>
 </root>

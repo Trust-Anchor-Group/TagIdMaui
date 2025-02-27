@@ -137,7 +137,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 					return;
 				}
 
-				object SendResult = await InternetContent.PostAsync(
+				ContentResponse SendResult = await InternetContent.PostAsync(
 					new Uri("https://" + Constants.Domains.IdDomain + "/ID/SendVerificationMessage.ws"),
 					new Dictionary<string, object>()
 					{
@@ -146,9 +146,12 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 						{ "Language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
 					}, new KeyValuePair<string, string>("Accept", "application/json"));
 
+				SendResult.AssertOk();
 
-				if (SendResult is Dictionary<string, object> SendResponse &&
-					SendResponse.TryGetValue("Status", out object? Obj) && Obj is bool SendStatus && SendStatus)
+				if (SendResult.Decoded is Dictionary<string, object> SendResponse &&
+					SendResponse.TryGetValue("Status", out object? Obj) &&
+					Obj is bool SendStatus &&
+					SendStatus)
 				{
 					this.StartTimer();
 
@@ -158,7 +161,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 
 					if (!string.IsNullOrEmpty(Code))
 					{
-						object VerifyResult = await InternetContent.PostAsync(
+						ContentResponse VerifyResult = await InternetContent.PostAsync(
 							new Uri("https://" + Constants.Domains.IdDomain + "/ID/VerifyNumber.ws"),
 							new Dictionary<string, object>()
 							{
@@ -166,11 +169,15 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 								{ "Code", int.Parse(Code, NumberStyles.None, CultureInfo.InvariantCulture) }
 							}, new KeyValuePair<string, string>("Accept", "application/json"));
 
+						VerifyResult.AssertOk();
 
-						if (VerifyResult is Dictionary<string, object> VerifyResponse &&
-							VerifyResponse.TryGetValue("Status", out Obj) && Obj is bool VerifyStatus && VerifyStatus)
+						if (VerifyResult.Decoded is Dictionary<string, object> VerifyResponse &&
+							VerifyResponse.TryGetValue("Status", out Obj) &&
+							Obj is bool VerifyStatus &&
+							VerifyStatus)
 						{
 							ServiceRef.TagProfile.EMail = this.EmailText;
+
 							if(string.IsNullOrEmpty(ServiceRef.TagProfile.Account))
 								GoToRegistrationStep(RegistrationStep.NameEntry);
 							else
@@ -219,7 +226,7 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 					return;
 				}
 
-				object SendResult = await InternetContent.PostAsync(
+				ContentResponse SendResult = await InternetContent.PostAsync(
 					new Uri("https://" + Constants.Domains.IdDomain + "/ID/SendVerificationMessage.ws"),
 					new Dictionary<string, object>()
 					{
@@ -228,7 +235,9 @@ namespace NeuroAccessMaui.UI.Pages.Registration.Views
 						{ "Language", CultureInfo.CurrentCulture.TwoLetterISOLanguageName }
 					}, new KeyValuePair<string, string>("Accept", "application/json"));
 
-				if (SendResult is Dictionary<string, object> SendResponse &&
+				SendResult.AssertOk();
+
+				if (SendResult.Decoded is Dictionary<string, object> SendResponse &&
 					SendResponse.TryGetValue("Status", out object? Obj) && Obj is bool SendStatus && SendStatus)
 				{
 					this.StartTimer();

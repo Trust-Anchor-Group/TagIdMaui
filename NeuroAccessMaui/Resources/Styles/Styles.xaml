@@ -454,13 +454,15 @@
 	</Style>
 
 	<Style x:Key="PopupBorder" ApplyToDerivedTypes="False" TargetType="Border">
-		<Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryBackgroundLight}, Dark={StaticResource SecondaryBackgroundDark}}" />
-		<Setter Property="Padding" Value="{StaticResource LargeMargins}" />
+		<Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SecondaryBackgroundLight}, Dark={StaticResource PopUpElevation1Dark}}" />
+		<Setter Property="Padding" Value="{StaticResource MediumMargins}" />
 		<Setter Property="StrokeShape">
 			<RoundRectangle CornerRadius="{StaticResource MediumCornerRadius}" />
 		</Setter>
 		<Setter Property="Shadow">
-			<Shadow />
+			<Setter.Value>
+				<Shadow Brush="{AppThemeBinding Light={StaticResource PrimaryBackgroundDark}, Dark={StaticResource PrimaryBackgroundLight}}" Offset="0,0" Radius="10" Opacity=".25" />
+			</Setter.Value>
 		</Setter>
 	</Style>
 

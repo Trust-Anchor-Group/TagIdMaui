@@ -2497,6 +2497,24 @@
     <value>Transitório</value>
   </data>
   <data name="GenerateQrCode" xml:space="preserve">
-      <value>Gerar QR Code</value>
+    <value>Gerar QR Code</value>
+  </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Câmera</value>
+  </data>
+  <data name="CameraPermissionDescription" xml:space="preserve">
+    <value>Para usar este recurso, por favor habilite o acesso à câmera nas suas configurações.</value>
+  </data>
+  <data name="CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Abra as configurações - Clique em "Permissões" - Habilite as permissões da câmera</value>
+  </data>
+  <data name="iOS_CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Abra as configurações - Habilite as permissões da câmera</value>
+	</data>
+  <data name="GoToSettings" xml:space="preserve">
+    <value>Abrir configurações</value>
+  </data>
+  <data name="Skip" xml:space="preserve">
+    <value>Pular</value>
   </data>
 </root>

@@ -33,6 +33,11 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.TokenEvents
 		Transferred,
 
 		/// <summary>
+		/// Token donated to new owner
+		/// </summary>
+		Donated,
+
+		/// <summary>
 		/// Text note made by owner at the time.
 		/// </summary>
 		NoteText,
@@ -156,6 +161,8 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.TokenEvents
 				return new ExternalNoteXmlItem(ExternalNoteXml);
 			else if (Event is Transferred Transferred)
 				return new TransferredItem(Transferred);
+			else if (Event is Donated Donated)
+				return new DonatedItem(Donated);
 			else
 			{
 				return new NoteTextItem(new NoteText()

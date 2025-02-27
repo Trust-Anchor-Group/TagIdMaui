@@ -4,6 +4,7 @@ using NeuroAccessMaui.UI.Pages.Things.CanControl;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.DataForms;
 using Waher.Networking.XMPP.Provisioning;
+using Waher.Networking.XMPP.Provisioning.Events;
 using Waher.Persistence;
 using Waher.Things;
 

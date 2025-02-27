@@ -2499,4 +2499,22 @@
   <data name="GenerateQrCode" xml:space="preserve">
     <value>Generišite KR kod</value>
   </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Kameru</value>
+  </data>
+  <data name="CameraPermissionDescription" xml:space="preserve">
+    <value>Da biste koristili ovu funkciju, omogućite pristup kameri u podešavanjima.</value>
+  </data>
+  <data name="CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Otvori podešavanja - Kliknite na "Dozvole" - Omogući dozvole kamere</value>
+  </data>
+  <data name="iOS_CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Otvori podešavanja - Omogući dozvole kamere</value>
+  </data>
+  <data name="GoToSettings" xml:space="preserve">
+    <value>Otvori podešavanja</value>
+  </data>
+  <data name="Skip" xml:space="preserve">
+    <value>Preskoči</value>
+  </data>
 </root>

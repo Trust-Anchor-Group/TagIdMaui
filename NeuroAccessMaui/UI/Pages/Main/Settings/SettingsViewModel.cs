@@ -253,7 +253,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 							this.AuthenticationMethod != this.ApprovedAuthenticationMethod &&
 							Enum.TryParse(this.AuthenticationMethod, out AuthenticationMethod AuthenticationMethod))
 						{
-							if (await App.AuthenticateUser(AuthenticationPurpose.ChangeAuthenticationMethod, true))
+							if (await App.AuthenticateUserAsync(AuthenticationPurpose.ChangeAuthenticationMethod, true))
 							{
 								ServiceRef.TagProfile.AuthenticationMethod = AuthenticationMethod;
 								this.ApprovedAuthenticationMethod = this.AuthenticationMethod;
@@ -330,8 +330,8 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 			try
 			{
 				//Authenticate user
-				await App.CheckUserBlocking();
-				if (await App.AuthenticateUser(AuthenticationPurpose.ChangePassword, true) == false)
+				await App.CheckUserBlockingAsync();
+				if (await App.AuthenticateUserAsync(AuthenticationPurpose.ChangePassword, true) == false)
 					return;
 
 				//Update the network password
@@ -374,7 +374,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 			if (!ServiceRef.PlatformSpecific.CanProhibitScreenCapture)
 				return;
 
-			if (!await App.AuthenticateUser(AuthenticationPurpose.PermitScreenCapture))
+			if (!await App.AuthenticateUserAsync(AuthenticationPurpose.PermitScreenCapture))
 				return;
 
 			ServiceRef.PlatformSpecific.ProhibitScreenCapture = false;
@@ -385,7 +385,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 			if (!ServiceRef.PlatformSpecific.CanProhibitScreenCapture)
 				return;
 
-			if (!await App.AuthenticateUser(AuthenticationPurpose.ProhibitScreenCapture))
+			if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ProhibitScreenCapture))
 				return;
 
 			ServiceRef.PlatformSpecific.ProhibitScreenCapture = true;
@@ -395,7 +395,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 		public override async Task GoBack()
 		{
 			if (this.RestartNeeded)
-				await App.Stop();
+				await App.StopAsync();
 			else
 				await base.GoBack();
 		}
@@ -411,7 +411,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 				if (!await AreYouSure(ServiceRef.Localizer[nameof(AppResources.AreYouSureYouWantToRevokeYourLegalIdentity)]))
 					return;
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.RevokeIdentity, true))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.RevokeIdentity, true))
 					return;
 
 				(bool succeeded, LegalIdentity? RevokedIdentity) = await ServiceRef.NetworkService.TryRequest(async () =>
@@ -454,7 +454,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 				if (!await AreYouSure(ServiceRef.Localizer[nameof(AppResources.AreYouSureYouWantToReportYourLegalIdentityAsCompromized)]))
 					return;
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.ReportAsCompromized, true))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ReportAsCompromized, true))
 					return;
 
 				(bool succeeded, LegalIdentity? CompromisedIdentity) = await ServiceRef.NetworkService.TryRequest(
@@ -481,7 +481,7 @@ namespace NeuroAccessMaui.UI.Pages.Main.Settings
 
 			try
 			{
-				string? Password = await App.InputPassword(AuthenticationPurpose.TransferIdentity);
+				string? Password = await App.InputPasswordAsync(AuthenticationPurpose.TransferIdentity);
 				if (Password is null)
 					return;
 

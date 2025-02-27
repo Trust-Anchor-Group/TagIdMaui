@@ -561,73 +561,83 @@ namespace NeuroAccessMaui.Services.UI
 		public ReadOnlyCollection<PopupPage?> PopupStack => new(this.popupStack.ToList());
 
 		/// <inheritdoc/>
-		public Task PushAsync<TPage, TViewModel>() where TPage : BasePopup, new() where TViewModel : BasePopupViewModel, new()
+		public async Task PushAsync<TPage, TViewModel>() where TPage : BasePopup, new() where TViewModel : BasePopupViewModel, new()
 		{
-			TPage page = new();
-			TViewModel viewModel = new();
-			page.ViewModel = viewModel;
+			TPage Page = new();
+			TViewModel ViewModel = new();
+			Page.ViewModel = ViewModel;
 
-			this.popupStack.Push(page);
-			return MopupService.Instance.PushAsync(page);
+			this.popupStack.Push(Page);
+			await MopupService.Instance.PushAsync(Page);
+			await ViewModel.Popped;
 		}
 
 		/// <inheritdoc/>
-		public Task PushAsync<TPage, TViewModel>(TPage page, TViewModel viewModel) where TPage : BasePopup where TViewModel : BasePopupViewModel
+		public async Task PushAsync<TPage, TViewModel>(TPage page, TViewModel viewModel) where TPage : BasePopup where TViewModel : BasePopupViewModel
 		{
 			page.ViewModel = viewModel;
 
 			this.popupStack.Push(page);
-			return MopupService.Instance.PushAsync(page);
+			await MopupService.Instance.PushAsync(page);
+			await page.ViewModel.Popped;
 		}
 
 		/// <inheritdoc/>
-		public Task PushAsync<TPage, TViewModel>(TPage page) where TPage : BasePopup where TViewModel : BasePopupViewModel, new()
+		public async Task PushAsync<TPage, TViewModel>(TPage page) where TPage : BasePopup where TViewModel : BasePopupViewModel, new()
 		{
-			TViewModel viewModel = new();
-			page.ViewModel = viewModel;
+			TViewModel ViewModel = new();
+			page.ViewModel = ViewModel;
 
 			this.popupStack.Push(page);
-			return MopupService.Instance.PushAsync(page);
+			await MopupService.Instance.PushAsync(page);
+			await ViewModel.Popped;
 		}
 
 		/// <inheritdoc/>
-		public Task PushAsync<TPage, TViewModel>(TViewModel viewModel) where TPage : BasePopup, new() where TViewModel : BasePopupViewModel
+		public async Task PushAsync<TPage, TViewModel>(TViewModel viewModel) where TPage : BasePopup, new() where TViewModel : BasePopupViewModel
 		{
-			TPage page = new()
+			TPage Page = new()
 			{
 				ViewModel = viewModel
 			};
 
-			this.popupStack.Push(page);
-			return MopupService.Instance.PushAsync(page);
+			this.popupStack.Push(Page);
+			await MopupService.Instance.PushAsync(Page);
+			await viewModel.Popped;
 		}
 
 		/// <inheritdoc/>
-		public Task PushAsync<TPage>() where TPage : BasePopup, new()
+		public async Task PushAsync<TPage>() where TPage : BasePopup, new()
 		{
-			TPage page = new();
-			this.popupStack.Push(page);
-			return MopupService.Instance.PushAsync(page);
+			TPage Page = new();
+			Page.BindingContext ??= new BasePopupViewModel();
+
+			this.popupStack.Push(Page);
+			await MopupService.Instance.PushAsync(Page);
+			if(Page.ViewModel is not null)
+				await Page.ViewModel.Popped;
 		}
 
 		/// <inheritdoc/>
-		public Task PushAsync<TPage>(TPage page) where TPage : BasePopup
+		public async Task PushAsync<TPage>(TPage page) where TPage : BasePopup
 		{
-			BasePopupViewModel? viewModel = page.ViewModel;
+			page.ViewModel ??= new BasePopupViewModel();
+
 			this.popupStack.Push(page);
-			return MopupService.Instance.PushAsync(page);
+			await MopupService.Instance.PushAsync(page);
+			await page.ViewModel.Popped;
 		}
 
 		/// <inheritdoc/>
 		public async Task<TReturn?> PushAsync<TPage, TViewModel, TReturn>() where TPage : BasePopup, new() where TViewModel : ReturningPopupViewModel<TReturn>, new()
 		{
-			TPage page = new();
-			TViewModel viewModel = new();
-			page.ViewModel = viewModel;
+			TPage Page = new();
+			TViewModel ViewModel = new();
+			Page.ViewModel = ViewModel;
 
-			this.popupStack.Push(page);
-			await MopupService.Instance.PushAsync(page);
-			return await viewModel.Result;
+			this.popupStack.Push(Page);
+			await MopupService.Instance.PushAsync(Page);
+			return await ViewModel.Result;
 		}
 
 		/// <inheritdoc/>
@@ -644,24 +654,24 @@ namespace NeuroAccessMaui.Services.UI
 		public async Task<TReturn?> PushAsync<TPage, TViewModel, TReturn>(TPage page) where TPage : BasePopup
 			where TViewModel : ReturningPopupViewModel<TReturn>, new()
 		{
-			TViewModel viewModel = new();
-			page.ViewModel = viewModel;
+			TViewModel ViewModel = new();
+			page.ViewModel = ViewModel;
 
 			this.popupStack.Push(page);
 			await MopupService.Instance.PushAsync(page);
-			return await viewModel.Result;
+			return await ViewModel.Result;
 		}
 
 		/// <inheritdoc/>
 		public async Task<TReturn?> PushAsync<TPage, TViewModel, TReturn>(TViewModel viewModel) where TPage : BasePopup, new() where TViewModel : ReturningPopupViewModel<TReturn>
 		{
-			TPage page = new()
+			TPage Page = new()
 			{
 				ViewModel = viewModel
 			};
 
-			this.popupStack.Push(page);
-			await MopupService.Instance.PushAsync(page);
+			this.popupStack.Push(Page);
+			await MopupService.Instance.PushAsync(Page);
 
 			return await viewModel.Result;
 		}
@@ -673,15 +683,15 @@ namespace NeuroAccessMaui.Services.UI
 				return;
 			try
 			{
-				object? vm = this.popupStack.Pop()?.BindingContext;
-				if (vm is not null)
-					(vm as BasePopupViewModel)?.OnPop();
+				object? ViewModel = this.popupStack.Pop()?.BindingContext;
+				if (ViewModel is BasePopupViewModel BaseVm)
+					await BaseVm.OnPopInternal();
 
 				await MopupService.Instance.PopAsync();
 			}
-			catch (Exception ex)
+			catch (Exception Ex)
 			{
-				ServiceRef.LogService.LogException(ex);
+				ServiceRef.LogService.LogException(Ex);
 			}
 		}
 

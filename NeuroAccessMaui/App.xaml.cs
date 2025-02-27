@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
@@ -63,135 +63,72 @@ using Waher.Things;
 namespace NeuroAccessMaui
 {
 	/// <summary>
-	/// The Application class, representing an instance of the Neuro-Access app.
+	/// Represents an instance of the Neuro-Access app.
 	/// </summary>
-	public partial class App : Application, IDisposable
+	public partial class App : Application, IDisposableAsync
 	{
-		private readonly SemaphoreSlim autoSaveSemaphore = new SemaphoreSlim(1, 1);
-		private static readonly TaskCompletionSource<bool> servicesSetup = new();
-		private static readonly TaskCompletionSource<bool> defaultInstantiatedSource = new();
-		private static bool configLoaded = false;
-		private static bool defaultInstantiated = false;
-		private static DateTime savedStartTime = DateTime.MinValue;
-		private static bool displayedPasswordPopup = false;
-		private static int startupCounter = 0;
-		private readonly LoginAuditor loginAuditor;
+		#region Fields
+
+		private readonly SemaphoreSlim autoSaveSemaphore = new(1, 1);
 		private Timer? autoSaveTimer;
 		private readonly Task<bool> initCompleted;
 		private readonly SemaphoreSlim startupWorker = new(1, 1);
 		private CancellationTokenSource startupCancellation;
 		private bool isDisposed;
 
-		// The App class is not actually a singleton. Each time Android MainActivity is destroyed and then created again, a new instance
-		// of the App class will be created, its OnStart method will be called and its OnResume method will not be called. This happens,
-		// for example, on Android when the user presses the back button and then navigates to the app again. However, the App class
-		// doesn't seem to work properly (should it?) when this happens (some chaos happens here and there), so we pretend that
-		// there is only one instance (see the references to onStartResumesApplication).
-		private bool onStartResumesApplication = false;
+		private readonly LoginAuditor loginAuditor;
 
-		/// <summary>
-		/// Gets the last application instance.
-		/// </summary>
 		private static App? appInstance;
+		private static bool configLoaded;
+		private static bool defaultInstantiated;
+		private static DateTime savedStartTime = DateTime.MinValue;
+		private static bool displayedPasswordPopup;
+		private static int startupCounter;
+
+		private static readonly TaskCompletionSource<bool> servicesSetup = new();
+		private static readonly TaskCompletionSource<bool> defaultInstantiatedSource = new();
+
+        /// <summary>
+        /// Flag indicating if this instance is “resuming” an already-started app.
+        /// 
+        /// The App class is not actually a singleton. Each time Android MainActivity is destroyed and then created again, a new instance
+        /// of the App class will be created, its OnStart method will be called and its OnResume method will not be called. This happens,
+        /// for example, on Android when the user presses the back button and then navigates to the app again. However, the App class
+        /// doesn't seem to work properly (should it?) when this happens (some chaos happens here and there), so we pretend that
+        /// there is only one instance (see the references to onStartResumesApplication).
+        /// </summary>
+        private bool onStartResumesApplication;
+
+		#endregion
+
+		#region Properties
 
 		/// <summary>
-		/// Gets the current application, type casted to <see cref="App"/>.
+		/// Gets the current application instance.
 		/// </summary>
 		public static new App? Current => appInstance;
-
-		/// <inheritdoc/>
-		public App()
-			: this(false)
-		{
-		}
-
-		/// <inheritdoc/>
-		public App(bool BackgroundStart)
-		{
-			App? PreviousInstance = appInstance;
-			appInstance = this;
-
-			this.onStartResumesApplication = PreviousInstance is not null;
-
-			// If the previous instance is null, create the app state from scratch. If not, just copy the state from the previous instance.
-			//!!! replace this logic with static variables
-			if (PreviousInstance is null)
-			{
-				InitLocalizationResource();
-
-				AppDomain.CurrentDomain.UnhandledException += this.CurrentDomain_UnhandledException;
-				TaskScheduler.UnobservedTaskException += this.TaskScheduler_UnobservedTaskException;
-
-				LoginInterval[] LoginIntervals =
-					[
-						new LoginInterval(Constants.Password.FirstMaxPasswordAttempts, TimeSpan.FromHours(Constants.Password.FirstBlockInHours)),
-						new LoginInterval(Constants.Password.SecondMaxPasswordAttempts, TimeSpan.FromHours(Constants.Password.SecondBlockInHours)),
-						new LoginInterval(Constants.Password.ThirdMaxPasswordAttempts, TimeSpan.FromHours(Constants.Password.ThirdBlockInHours))
-					];
-
-				this.loginAuditor = new LoginAuditor(Constants.Password.LogAuditorObjectID, LoginIntervals);
-				this.startupCancellation = new CancellationTokenSource();
-				this.initCompleted = this.Init(BackgroundStart);
-			}
-			else
-			{
-				this.loginAuditor = PreviousInstance.loginAuditor;
-				this.autoSaveTimer = PreviousInstance.autoSaveTimer;
-				this.initCompleted = PreviousInstance.initCompleted;
-				this.startupWorker = PreviousInstance.startupWorker;
-				this.startupCancellation = PreviousInstance.startupCancellation;
-			}
-
-			if (!BackgroundStart)
-			{
-				this.InitializeComponent();
-				//Current!.UserAppTheme = AppTheme.Unspecified;
-				AppTheme? currentTheme = ServiceRef.TagProfile.Theme;
-				ServiceRef.TagProfile.SetTheme(currentTheme ?? AppTheme.Light);
-
-				// Start page
-				try
-				{
-					this.MainPage = ServiceHelper.GetService<AppShell>();
-				}
-				catch (Exception ex)
-				{
-					this.HandleStartupException(ex);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Gets a value indicating if the application has completed on-boarding.
-		/// </summary>
-		/// <remarks>
-		/// This is not the same as <see cref="TagProfile.IsComplete"/>. <see cref="TagProfile.IsComplete"/> is required but not
-		/// sufficient for the application to be "on-boarded". An application is on-boarded when its legal identity is on-boarded
-		/// and when its internal systems are ready. For example, the loading stage of the app must complete.
-		/// </remarks>
-		public static bool IsOnboarded => Shell.Current is not null;
 
 		/// <summary>
 		/// Supported languages.
 		/// </summary>
 		public static readonly LanguageInfo[] SupportedLanguages =
-			[
-				new("en", "English"),
-				new("sv", "svenska"),
-				new("es", "español"),
-				new("fr", "français"),
-				new("de", "Deutsch"),
-				new("da", "dansk"),
-				new("no", "norsk"),
-				new("fi", "suomi"),
-				new("sr", "српски"),
-				new("pt", "português"),
-				new("ro", "română"),
-				new("ru", "русский"),
-			];
+		[
+			new("en", "English"),
+			new("sv", "svenska"),
+			new("es", "español"),
+			new("fr", "français"),
+			new("de", "Deutsch"),
+			new("da", "dansk"),
+			new("no", "norsk"),
+			new("fi", "suomi"),
+			new("sr", "српски"),
+			new("pt", "português"),
+			new("ro", "română"),
+			new("ru", "русский")
+		];
 
 		/// <summary>
-		/// Selected language.
+		/// Gets the selected language.
 		/// </summary>
 		public static LanguageInfo SelectedLanguage
 		{
@@ -203,10 +140,11 @@ namespace NeuroAccessMaui
 				if (LanguageName is not null)
 				{
 					SelectedLanguage = SupportedLanguages.FirstOrDefault(
-						el => string.Equals(el.TwoLetterISOLanguageName, LanguageName, StringComparison.OrdinalIgnoreCase), SelectedLanguage);
+						el => string.Equals(el.TwoLetterISOLanguageName, LanguageName, StringComparison.OrdinalIgnoreCase),
+						SelectedLanguage);
 				}
 
-				if ((LanguageName is null) ||
+				if (LanguageName is null ||
 					!string.Equals(SelectedLanguage.TwoLetterISOLanguageName, LanguageName, StringComparison.OrdinalIgnoreCase))
 				{
 					Preferences.Set("user_selected_language", SelectedLanguage.TwoLetterISOLanguageName);
@@ -216,95 +154,172 @@ namespace NeuroAccessMaui
 			}
 		}
 
+		/// <summary>
+		/// Indicates whether the application is onboarded.
+		/// </summary>
+		public static bool IsOnboarded => Shell.Current is not null;
+
+		/// <summary>
+		/// Define a static event to notify when the app enters the foreground.
+		/// </summary>
+		public static event EventHandler? AppActivated;
+
+
+		#endregion
+
+		#region Constructor
+
+		public App() : this(false) { }
+
+		public App(bool backgroundStart)
+		{
+			// Manage single-instance behavior.
+			App? PreviousInstance = appInstance;
+			appInstance = this;
+			this.onStartResumesApplication = PreviousInstance is not null;
+
+			if (PreviousInstance is null)
+			{
+				InitLocalizationResource();
+
+				AppDomain.CurrentDomain.UnhandledException += this.CurrentDomain_UnhandledException;
+				TaskScheduler.UnobservedTaskException += this.TaskScheduler_UnobservedTaskException;
+
+				// Initialize the login auditor.
+				LoginInterval[] LoginIntervals =
+				[
+					new(Constants.Password.FirstMaxPasswordAttempts, TimeSpan.FromHours(Constants.Password.FirstBlockInHours)),
+					new(Constants.Password.SecondMaxPasswordAttempts, TimeSpan.FromHours(Constants.Password.SecondBlockInHours)),
+					new(Constants.Password.ThirdMaxPasswordAttempts, TimeSpan.FromHours(Constants.Password.ThirdBlockInHours))
+				];
+
+				this.loginAuditor = new LoginAuditor(Constants.Password.LogAuditorObjectID, LoginIntervals);
+				this.startupCancellation = new CancellationTokenSource();
+				this.initCompleted = this.InitializeAppAsync(backgroundStart);
+			}
+			else
+			{
+				// Reuse state from the previous instance.
+				this.loginAuditor = PreviousInstance.loginAuditor;
+				this.autoSaveTimer = PreviousInstance.autoSaveTimer;
+				this.initCompleted = PreviousInstance.initCompleted;
+				this.startupCancellation = PreviousInstance.startupCancellation;
+			}
+
+			if (!backgroundStart)
+			{
+				this.InitializeComponent();
+				AppTheme? CurrentTheme = ServiceRef.TagProfile.Theme;
+				ServiceRef.TagProfile.SetTheme(CurrentTheme ?? AppTheme.Light);
+
+				try
+				{
+					this.MainPage = ServiceHelper.GetService<AppShell>();
+				}
+				catch (Exception Ex)
+				{
+					this.HandleStartupException(Ex);
+				}
+			}
+		}
+
+		#endregion
+
+		#region Initialization
+
 		private static void InitLocalizationResource()
 		{
 			LocalizationManager.Current.PropertyChanged += (_, _) => AppResources.Culture = LocalizationManager.Current.CurrentCulture;
 			LocalizationManager.Current.CurrentCulture = SelectedLanguage;
 		}
 
-		private Task<bool> Init(bool BackgroundStart)
+		private Task<bool> InitializeAppAsync(bool backgroundStart)
 		{
-			TaskCompletionSource<bool> Result = new();
-			Task.Run(async () => await this.InitInParallel(Result, BackgroundStart));
-			return Result.Task;
+			TaskCompletionSource<bool> ResultTcs = new();
+			Task.Run(async () => await this.InitializeAppInternalAsync(ResultTcs, backgroundStart));
+			return ResultTcs.Task;
 		}
 
-		private async Task InitInParallel(TaskCompletionSource<bool> Result, bool BackgroundStart)
+		private async Task InitializeAppInternalAsync(TaskCompletionSource<bool> resultTcs, bool backgroundStart)
 		{
 			try
 			{
-				this.InitInstances();
-
+				this.InitializeInstances();
 				await ServiceRef.CryptoService.InitializeJwtFactory();
-				await this.PerformStartup(false, BackgroundStart);
-
-				Result.TrySetResult(true);
+				await this.PerformStartupAsync(isResuming: false, backgroundStart);
+				resultTcs.TrySetResult(true);
 			}
-			catch (Exception ex)
+			catch (Exception Ex)
 			{
-				ex = Log.UnnestException(ex);
-				this.HandleStartupException(ex);
-
+				Ex = Log.UnnestException(Ex);
+				this.HandleStartupException(Ex);
 				servicesSetup.TrySetResult(false);
-				Result.TrySetResult(false);
+				resultTcs.TrySetResult(false);
 			}
 		}
 
-		private void InitInstances()
+		private void HandleStartupException(Exception Ex)
+		{
+            Ex = Log.UnnestException(Ex);
+			ServiceRef.LogService.SaveExceptionDump("StartPage", Ex.ToString());
+			this.DisplayBootstrapErrorPage(Ex.Message, Ex.StackTrace ?? string.Empty);
+			return;
+		}
+
+		/// <summary>
+		/// Initializes required types and registers services.
+		/// </summary>
+		private void InitializeInstances()
 		{
 			Assembly AppAssembly = this.GetType().Assembly;
 
 			if (!Types.IsInitialized)
 			{
-				// Define the scope and reach of Runtime.Inventory (Script, Serialization, Persistence, IoC, etc.):
 				Types.Initialize(
-					AppAssembly,                                // Allows for objects defined in this assembly, to be instantiated and persisted.
-					typeof(Database).Assembly,                  // Indexes default attributes
-					typeof(ObjectSerializer).Assembly,          // Indexes general serializers
-					typeof(FilesProvider).Assembly,             // Indexes special serializers
-					typeof(RuntimeSettings).Assembly,           // Allows for persistence of settings in the object database
-					typeof(PersistedEvent).Assembly,            // Persistence of events logged internally
-					typeof(InternetContent).Assembly,           // Common Content-Types
-					typeof(ImageCodec).Assembly,                // Common Image Content-Types
-					typeof(MarkdownDocument).Assembly,          // Markdown object model
-					typeof(XML).Assembly,                       // XML Content-Type
-					typeof(DnsResolver).Assembly,               // Serialization of DNS-related objects
-					typeof(XmppClient).Assembly,                // Serialization of general XMPP objects
-					typeof(ContractsClient).Assembly,           // Serialization of XMPP objects related to digital identities and smart contracts
-					typeof(NeuroFeaturesClient).Assembly,       // Serialization of XMPP objects related to Neuro-Feature tokens
-					typeof(EDalerClient).Assembly,              // Management of eDaler URIs
-					typeof(SensorClient).Assembly,              // Serialization of XMPP objects related to sensors
-					typeof(ControlClient).Assembly,             // Serialization of XMPP objects related to actuators
-					typeof(ConcentratorClient).Assembly,        // Serialization of XMPP objects related to concentrators
-					typeof(ProvisioningClient).Assembly,        // Serialization of XMPP objects related to provisioning
-					typeof(PubSubClient).Assembly,              // Serialization of XMPP objects related to publish/subscribe pattern
-					typeof(PepClient).Assembly,                 // Serialization of XMPP objects related to personal eventing protocol (PEP)
-					typeof(AvatarClient).Assembly,              // Serialization of XMPP objects related to avatars
-					typeof(PushNotificationClient).Assembly,    // Serialization of XMPP objects related to push notification
-					typeof(MailClient).Assembly,                // Serialization of XMPP objects related to processing of incoming e-mail
-					typeof(ThingReference).Assembly,            // IoT Abstraction library
-					typeof(JwtFactory).Assembly,                // JSON Web Tokens (JWT)
-					typeof(JwsAlgorithm).Assembly,              // JSON Web Signatures (JWS)
-					typeof(Expression).Assembly,                // Indexes basic script functions
-					typeof(Graph).Assembly,                     // Indexes graph script functions
-					typeof(GraphEncoder).Assembly,              // Indexes content script functions
-					typeof(XmppServerlessMessaging).Assembly,   // Indexes End-to-End encryption mechanisms
-					typeof(HttpxClient).Assembly);              // Support for HTTP over XMPP (HTTPX) URI Scheme.
+					AppAssembly,
+					typeof(Database).Assembly,
+					typeof(ObjectSerializer).Assembly,
+					typeof(FilesProvider).Assembly,
+					typeof(RuntimeSettings).Assembly,
+					typeof(PersistedEvent).Assembly,
+					typeof(InternetContent).Assembly,
+					typeof(ImageCodec).Assembly,
+					typeof(MarkdownDocument).Assembly,
+					typeof(XML).Assembly,
+					typeof(DnsResolver).Assembly,
+					typeof(XmppClient).Assembly,
+					typeof(ContractsClient).Assembly,
+					typeof(NeuroFeaturesClient).Assembly,
+					typeof(EDalerClient).Assembly,
+					typeof(SensorClient).Assembly,
+					typeof(ControlClient).Assembly,
+					typeof(ConcentratorClient).Assembly,
+					typeof(ProvisioningClient).Assembly,
+					typeof(PubSubClient).Assembly,
+					typeof(PepClient).Assembly,
+					typeof(AvatarClient).Assembly,
+					typeof(PushNotificationClient).Assembly,
+					typeof(MailClient).Assembly,
+					typeof(ThingReference).Assembly,
+					typeof(JwtFactory).Assembly,
+					typeof(JwsAlgorithm).Assembly,
+					typeof(Expression).Assembly,
+					typeof(Graph).Assembly,
+					typeof(GraphEncoder).Assembly,
+					typeof(XmppServerlessMessaging).Assembly,
+					typeof(HttpxClient).Assembly);
 			}
-			// Register Exceptions that should generate Alert events instead of Critical events (i.e. one type higher). 
+
+			// Register exceptions as alerts.
 			Log.RegisterAlertExceptionType(true,
 				typeof(OutOfMemoryException),
 				typeof(StackOverflowException),
 				typeof(AccessViolationException),
 				typeof(InsufficientMemoryException));
 
-			EndpointSecurity.SetCiphers(
-			[
-				typeof(Edwards448Endpoint)
-			], false);
+			EndpointSecurity.SetCiphers([typeof(Edwards448Endpoint)], false);
 
-			// Create Services
-
+			// Instantiate default services.
 			Types.InstantiateDefault<ITagProfile>(false);
 			Types.InstantiateDefault<ILogService>(false);
 			Types.InstantiateDefault<IUiService>(false);
@@ -320,20 +335,19 @@ namespace NeuroAccessMaui
 
 			defaultInstantiatedSource.TrySetResult(true);
 
-			// Set resolver
-
+			// Set dependency resolver.
 			DependencyResolver.ResolveUsing(type =>
 			{
 				if (Types.GetType(type.FullName) is null)
-					return null;    // Type not managed by Runtime.Inventory. MAUI resolves this using its default mechanism.
+					return null;
 
 				try
 				{
 					return Types.Instantiate(true, type);
 				}
-				catch (Exception ex)
+				catch (Exception Ex)
 				{
-					ServiceRef.LogService.LogException(ex);
+					ServiceRef.LogService.LogException(Ex);
 					return null;
 				}
 			});
@@ -341,125 +355,81 @@ namespace NeuroAccessMaui
 			servicesSetup.TrySetResult(true);
 		}
 
-		private void HandleStartupException(Exception ex)
-		{
-			ex = Log.UnnestException(ex);
-			ServiceRef.LogService.SaveExceptionDump("StartPage", ex.ToString());
-			this.DisplayBootstrapErrorPage(ex.Message, ex.StackTrace ?? string.Empty);
-			return;
-		}
+        #endregion
 
-		/// <summary>
-		/// Instantiates an object of type <typeparamref name="T"/>, after assuring default instances have been created first.
-		/// Assures singleton classes are only instantiated once, and that the reference to the singleton instance is returned.
-		/// </summary>
-		/// <typeparam name="T">Type of object to instantiate.</typeparam>
-		/// <returns>Instance</returns>
-		public static T Instantiate<T>()
-		{
-			if (!defaultInstantiated)
-				defaultInstantiated = defaultInstantiatedSource.Task.Result;
+        #region Startup / Resume
 
-			return Types.Instantiate<T>(false);
-		}
+        public async Task OnBackgroundStart()
+        {
+            if (this.onStartResumesApplication)
+            {
+                this.onStartResumesApplication = false;
+                await this.ResumeAsync(isBackground: true);
+                return;
+            }
 
-		internal static async Task WaitForServiceSetup()
-		{
-			await servicesSetup.Task;
-		}
+            // Asynchronously wait up to 60 seconds.
+            if (!await this.initCompleted.WaitAsync(TimeSpan.FromSeconds(60)))
+                throw new Exception("Initialization did not complete in time.");
+        }
 
-		#region Startup/Shutdown
+        protected override async void OnStart()
+        {
+            if (this.onStartResumesApplication)
+            {
+                this.onStartResumesApplication = false;
+                this.OnResume();
+                return;
+            }
 
-		/// <summary>
-		/// Awaiting the services start in the background.
-		/// </summary>
-		public async Task OnBackgroundStart()
-		{
-			if (this.onStartResumesApplication)
-			{
-				this.onStartResumesApplication = false;
-				await this.DoResume(true);
-				return;
-			}
+            if (!await this.initCompleted.WaitAsync(TimeSpan.FromSeconds(60)))
+                throw new Exception("Initialization did not complete in time.");
+        }
 
-			if (!this.initCompleted.Wait(60000))
-				throw new Exception("Initialization did not complete in time.");
-		}
-
-		/// <inheritdoc/>
-		protected override /*async*/ void OnStart()
-		{
-			if (this.onStartResumesApplication)
-			{
-				this.onStartResumesApplication = false;
-				this.OnResume();
-				return;
-			}
-
-			if (!this.initCompleted.Wait(60000))
-				throw new Exception("Initialization did not complete in time.");
-
-			//if (!await AuthenticateUser(AuthenticationPurpose.Start))
-			//	await Stop();
-		}
-
-		/// <summary>
-		/// Resume the services start in the background.
-		/// </summary>
-		public async Task DoResume(bool BackgroundStart)
+        public async Task ResumeAsync(bool isBackground)
 		{
 			appInstance = this;
 			this.startupCancellation = new CancellationTokenSource();
-
-			await this.PerformStartup(true, BackgroundStart);
+			await this.PerformStartupAsync(isResuming: true, backgroundStart: isBackground);
 		}
 
-		/// <inheritdoc/>
 		protected override async void OnResume()
 		{
-			await this.DoResume(false);
-
-			//if (!await AuthenticateUser(AuthenticationPurpose.Resume))
-			//	await Stop();
+			await this.ResumeAsync(isBackground: false);
 		}
 
-		private async Task PerformStartup(bool isResuming, bool BackgroundStart)
+		private async Task PerformStartupAsync(bool isResuming, bool backgroundStart)
 		{
 			await this.startupWorker.WaitAsync();
-
 			try
 			{
-				// do nothing if the services are already started
 				if (++startupCounter > 1)
 					return;
 
-				// cancel the startup if the application is closed
 				CancellationToken Token = this.startupCancellation.Token;
 				Token.ThrowIfCancellationRequested();
 
-				if (!BackgroundStart)
+				if (!backgroundStart)
 				{
-					await SendErrorReportFromPreviousRun();
+					await SendErrorReportFromPreviousRunAsync();
 					Token.ThrowIfCancellationRequested();
 				}
 
 				await ServiceRef.StorageService.Init(Token);
 				if (!configLoaded)
 				{
-					await this.CreateOrRestoreConfiguration();
+					await this.CreateOrRestoreConfigurationAsync();
 					configLoaded = true;
 				}
 
 				Token.ThrowIfCancellationRequested();
-
 				await ServiceRef.NetworkService.Load(isResuming, Token);
 				Token.ThrowIfCancellationRequested();
-
 				await ServiceRef.XmppService.Load(isResuming, Token);
 				Token.ThrowIfCancellationRequested();
 
-				TimeSpan initialAutoSaveDelay = Constants.Intervals.AutoSave.Multiply(4);
-				this.autoSaveTimer = new Timer(async _ => await this.AutoSave(), null, initialAutoSaveDelay, Constants.Intervals.AutoSave);
+				TimeSpan InitialAutoSaveDelay = Constants.Intervals.AutoSave.Multiply(4);
+				this.autoSaveTimer = new Timer(async _ => await this.AutoSaveAsync(), null, InitialAutoSaveDelay, Constants.Intervals.AutoSave);
 
 				await ServiceRef.UiService.Load(isResuming, Token);
 				await ServiceRef.AttachmentCacheService.Load(isResuming, Token);
@@ -472,13 +442,13 @@ namespace NeuroAccessMaui
 			}
 			catch (OperationCanceledException)
 			{
-				Log.Notice($"{(isResuming ? "OnResume " : "Initial app ")} startup was canceled.");
+				Log.Notice($"{(isResuming ? "OnResume" : "Initial app")} startup was canceled.");
 			}
-			catch (Exception ex)
+			catch (Exception Ex)
 			{
-				ex = Log.UnnestException(ex);
-				ServiceRef.LogService.SaveExceptionDump(ex.Message, ex.StackTrace ?? string.Empty);
-				this.DisplayBootstrapErrorPage(ex.Message, ex.StackTrace ?? string.Empty);
+				Ex = Log.UnnestException(Ex);
+				ServiceRef.LogService.SaveExceptionDump(Ex.Message, Ex.StackTrace ?? string.Empty);
+				this.DisplayBootstrapErrorPage(Ex.Message, Ex.StackTrace ?? string.Empty);
 			}
 			finally
 			{
@@ -486,33 +456,26 @@ namespace NeuroAccessMaui
 			}
 		}
 
-		/// <summary>
-		/// Awaiting the services stop in the background.
-		/// </summary>
-		public async Task OnBackgroundSleep()
-		{
-			await this.Shutdown(false);
-		}
+		#endregion
 
-		/// <inheritdoc/>
+		#region Sleep / Shutdown
+
+		public async Task OnBackgroundSleep() => await this.ShutdownAsync(inPanic: false);
+
 		protected override async void OnSleep()
 		{
-			// Done manually here, as the Disappearing event won't trigger when exiting the app,
-			// and we want to make sure state is persisted and teardown is done correctly to avoid memory leaks.
+			if (this.MainPage?.BindingContext is BaseViewModel Vm)
+				await Vm.Shutdown();
 
-			if (this.MainPage?.BindingContext is BaseViewModel vm)
-				await vm.Shutdown();
-
-			await this.Shutdown(false);
-
+			await this.ShutdownAsync(inPanic: false);
 			SetStartInactivityTime();
 		}
 
-		internal static async Task Stop()
+		internal static async Task StopAsync()
 		{
 			if (appInstance is not null)
 			{
-				await appInstance.Shutdown(false);
+				await appInstance.ShutdownAsync(inPanic: false);
 				appInstance = null;
 			}
 
@@ -526,16 +489,13 @@ namespace NeuroAccessMaui
 			}
 		}
 
-		private async Task Shutdown(bool inPanic)
+		private async Task ShutdownAsync(bool inPanic)
 		{
-			// if the PerformStartup is not finished, cancel it first
 			this.startupCancellation.Cancel();
 			await this.startupWorker.WaitAsync();
 
 			try
 			{
-				// do nothing if the services are already stopped
-				// or if the startup counter is greater than one
 				if ((startupCounter < 1) || (--startupCounter > 0))
 					return;
 
@@ -548,23 +508,24 @@ namespace NeuroAccessMaui
 				}
 				else
 				{
+					List<Task> UnloadTasks = [];
+
 					if (ServiceRef.UiService is not null)
-						await ServiceRef.UiService.Unload();
+						UnloadTasks.Add(ServiceRef.UiService.Unload());
 
 					if (ServiceRef.ContractOrchestratorService is not null)
-						await ServiceRef.ContractOrchestratorService.Unload();
+						UnloadTasks.Add(ServiceRef.ContractOrchestratorService.Unload());
 
 					if (ServiceRef.XmppService is not null)
-						await ServiceRef.XmppService.Unload();
+						UnloadTasks.Add(ServiceRef.XmppService.Unload());
 
 					if (ServiceRef.NetworkService is not null)
-						await ServiceRef.NetworkService.Unload();
+						UnloadTasks.Add(ServiceRef.NetworkService.Unload());
 
 					if (ServiceRef.AttachmentCacheService is not null)
-						await ServiceRef.AttachmentCacheService.Unload();
+						UnloadTasks.Add(ServiceRef.AttachmentCacheService.Unload());
 
-					if (ServiceRef.UiService is not null)
-						await ServiceRef.UiService.Unload();
+					await Task.WhenAll(UnloadTasks);
 
 					foreach (IEventSink Sink in Log.Sinks)
 						Log.Unregister(Sink);
@@ -574,15 +535,13 @@ namespace NeuroAccessMaui
 				}
 
 				// Causes list of singleton instances to be cleared.
-				Log.Terminate();
+				await Log.TerminateAsync();
 			}
 			finally
 			{
 				this.startupWorker.Release();
 			}
 		}
-
-		#endregion
 
 		private void StopAutoSaveTimer()
 		{
@@ -594,7 +553,11 @@ namespace NeuroAccessMaui
 			}
 		}
 
-		private async Task AutoSave()
+		#endregion
+
+		#region AutoSave
+
+		private async Task AutoSaveAsync()
 		{
 			await this.autoSaveSemaphore.WaitAsync();
 			try
@@ -604,23 +567,22 @@ namespace NeuroAccessMaui
 					ServiceRef.TagProfile.ResetIsDirty();
 					try
 					{
-						TagConfiguration tc = ServiceRef.TagProfile.ToConfiguration();
-
+						TagConfiguration Configuration = ServiceRef.TagProfile.ToConfiguration();
 						try
 						{
-							if (string.IsNullOrEmpty(tc.ObjectId))
-								await ServiceRef.StorageService.Insert(tc);
+							if (string.IsNullOrEmpty(Configuration.ObjectId))
+								await ServiceRef.StorageService.Insert(Configuration);
 							else
-								await ServiceRef.StorageService.Update(tc);
+								await ServiceRef.StorageService.Update(Configuration);
 						}
 						catch (KeyNotFoundException)
 						{
-							await ServiceRef.StorageService.Insert(tc);
+							await ServiceRef.StorageService.Insert(Configuration);
 						}
 					}
-					catch (Exception ex)
+					catch (Exception Ex)
 					{
-						ServiceRef.LogService.LogException(ex, this.GetClassAndMethod(MethodBase.GetCurrentMethod()));
+						ServiceRef.LogService.LogException(Ex, this.GetClassAndMethod(MethodBase.GetCurrentMethod()));
 					}
 				}
 			}
@@ -630,106 +592,88 @@ namespace NeuroAccessMaui
 			}
 		}
 
+		public async Task ForceSaveAsync() => await this.AutoSaveAsync();
 
-		private async Task CreateOrRestoreConfiguration()
+		#endregion
+
+		#region Configuration
+
+		private async Task CreateOrRestoreConfigurationAsync()
 		{
 			TagConfiguration? Configuration;
-
 			try
 			{
 				Configuration = await ServiceRef.StorageService.FindFirstDeleteRest<TagConfiguration>();
 			}
-			catch (Exception findException)
+			catch (Exception FindEx)
 			{
-				ServiceRef.LogService.LogException(findException, this.GetClassAndMethod(MethodBase.GetCurrentMethod()));
+				ServiceRef.LogService.LogException(FindEx, this.GetClassAndMethod(MethodBase.GetCurrentMethod()));
 				Configuration = null;
 			}
 
 			if (Configuration is null)
 			{
-				Configuration = new();
-
+				Configuration = new TagConfiguration();
 				try
 				{
 					await ServiceRef.StorageService.Insert(Configuration);
 				}
-				catch (Exception ex)
+				catch (Exception Ex)
 				{
-					ServiceRef.LogService.LogException(ex, this.GetClassAndMethod(MethodBase.GetCurrentMethod()));
+					ServiceRef.LogService.LogException(Ex, this.GetClassAndMethod(MethodBase.GetCurrentMethod()));
 				}
 			}
 
 			ServiceRef.TagProfile.FromConfiguration(Configuration);
 		}
 
-		public async Task ForceSave()
-		{
-			await this.AutoSave();
-		}
+		#endregion
 
-		/// <summary>
-		/// Switches the application to the on-boarding experience.
-		/// </summary>
-		public static Task SetRegistrationPageAsync()
-		{
-			return SetPage(Constants.Pages.RegistrationPage);
-		}
+		#region Page Navigation
 
-		/// <summary>
-		/// Switches the application to the main experience.
-		/// </summary>
-		public static Task SetMainPageAsync()
-		{
-			return SetPage(Constants.Pages.MainPage);
-		}
+		public static Task SetRegistrationPageAsync() => SetPageAsync(Constants.Pages.RegistrationPage);
 
-		/// <summary>
-		/// Sets the current page, if not already shown.
-		/// </summary>
-		/// <param name="PagePath">Path to current page.</param>
-		public static Task SetPage(string PagePath)
+		public static Task SetMainPageAsync() => SetPageAsync(Constants.Pages.MainPage);
+
+		public static Task SetPageAsync(string pagePath)
 		{
-			if (Shell.Current.CurrentState.Location?.OriginalString == PagePath)
+			if (Shell.Current.CurrentState.Location?.OriginalString == pagePath)
 				return Task.CompletedTask;
 
-			return MainThread.InvokeOnMainThreadAsync(() =>
-			{
-				return Shell.Current.GoToAsync(PagePath);
-			});
+			return MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync(pagePath));
 		}
+
+		#endregion
 
 		#region Error Handling
 
-		private async void TaskScheduler_UnobservedTaskException(object? Sender, UnobservedTaskExceptionEventArgs e)
+		private async void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
 		{
 			try
 			{
-				Exception ex = e.Exception;
+				Exception Ex = Log.UnnestException(e.Exception);
 				e.SetObserved();
-
-				ex = Log.UnnestException(ex);
-
-				await this.Handle_UnhandledException(ex, nameof(TaskScheduler_UnobservedTaskException), false);
+				await this.HandleUnhandledExceptionAsync(Ex, nameof(TaskScheduler_UnobservedTaskException), shutdown: false);
 			}
-			catch (Exception ex)
+			catch (Exception Ex)
 			{
-				ServiceRef.LogService.LogException(ex);
+				ServiceRef.LogService.LogException(Ex);
 			}
 		}
 
-		private async void CurrentDomain_UnhandledException(object? Sender, UnhandledExceptionEventArgs e)
+		private async void CurrentDomain_UnhandledException(object? sender, UnhandledExceptionEventArgs e)
 		{
 			try
 			{
-				await this.Handle_UnhandledException(e.ExceptionObject as Exception, nameof(CurrentDomain_UnhandledException), true);
+				await this.HandleUnhandledExceptionAsync(e.ExceptionObject as Exception, nameof(CurrentDomain_UnhandledException), shutdown: true);
 			}
-			catch (Exception ex)
+			catch (Exception Ex)
 			{
-				ServiceRef.LogService.LogException(ex);
+				ServiceRef.LogService.LogException(Ex);
 			}
 		}
 
-		private async Task Handle_UnhandledException(Exception? ex, string title, bool shutdown)
+		private async Task HandleUnhandledExceptionAsync(Exception? ex, string title, bool shutdown)
 		{
 			if (ex is not null)
 			{
@@ -738,40 +682,32 @@ namespace NeuroAccessMaui
 			}
 
 			if (shutdown)
-				await this.Shutdown(false);
+				await this.ShutdownAsync(inPanic: false);
 
 #if DEBUG
-			if (!shutdown)
+			if (!shutdown && this.MainPage is not null)
 			{
-				if (this.MainPage is not null)
+				if (this.Dispatcher.IsDispatchRequired)
 				{
-					if (this.Dispatcher.IsDispatchRequired)
+					this.Dispatcher.Dispatch(async () =>
 					{
-						this.Dispatcher.Dispatch(async () =>
-						{
-							await this.MainPage.DisplayAlert(title, ex?.ToString(),
-								ServiceRef.Localizer[nameof(AppResources.Ok)]);
-						});
-					}
-					else
-					{
-						await this.MainPage.DisplayAlert(title, ex?.ToString(),
-							ServiceRef.Localizer[nameof(AppResources.Ok)]);
-					}
+						await this.MainPage.DisplayAlert(title, ex?.ToString(), ServiceRef.Localizer[nameof(AppResources.Ok)]);
+					});
+				}
+				else
+				{
+					await this.MainPage.DisplayAlert(title, ex?.ToString(), ServiceRef.Localizer[nameof(AppResources.Ok)]);
 				}
 			}
 #endif
 		}
 
-		private void DisplayBootstrapErrorPage(string Title, string StackTrace)
+		private void DisplayBootstrapErrorPage(string title, string stackTrace)
 		{
-			this.Dispatcher.Dispatch(() =>
-			{
-				this.MainPage = new BootstrapErrorPage(Title, StackTrace);
-			});
+			this.Dispatcher.Dispatch(() => this.MainPage = new BootstrapErrorPage(title, stackTrace));
 		}
 
-		private static async Task SendErrorReportFromPreviousRun()
+		private static async Task SendErrorReportFromPreviousRunAsync()
 		{
 			if (ServiceRef.LogService is not null)
 			{
@@ -779,17 +715,13 @@ namespace NeuroAccessMaui
 				if (!string.IsNullOrWhiteSpace(StackTrace))
 				{
 					List<KeyValuePair<string, object?>> Tags =
-					[
-						new KeyValuePair<string, object?>(Constants.XmppProperties.Jid, ServiceRef.XmppService.BareJid)
-					];
+						[new KeyValuePair<string, object?>(Constants.XmppProperties.Jid, ServiceRef.XmppService.BareJid)];
 
-					KeyValuePair<string, object?>[]? Tags2 = ServiceRef.TagProfile.LegalIdentity?.GetTags();
-
-					if (Tags2 is not null)
-						Tags.AddRange(Tags2);
+					KeyValuePair<string, object?>[]? AdditionalTags = ServiceRef.TagProfile.LegalIdentity?.GetTags();
+					if (AdditionalTags is not null)
+						Tags.AddRange(AdditionalTags);
 
 					StringBuilder Msg = new();
-
 					Msg.Append("Unhandled exception caused app to crash. ");
 					Msg.AppendLine("Below you can find the stack trace of the corresponding exception.");
 					Msg.AppendLine();
@@ -801,7 +733,7 @@ namespace NeuroAccessMaui
 
 					try
 					{
-						await SendAlert(StackTrace, "text/plain");
+						await SendAlertAsync(StackTrace, "text/plain");
 					}
 					finally
 					{
@@ -811,179 +743,128 @@ namespace NeuroAccessMaui
 			}
 		}
 
-
-		internal static async Task SendAlert(string message, string contentType)
+		internal static async Task SendAlertAsync(string message, string contentType)
 		{
 			try
 			{
-				HttpClient client = new()
+				using HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(30) };
+				Client.DefaultRequestHeaders.Accept.Clear();
+				Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+				using StringContent Content = new(message)
 				{
-					Timeout = TimeSpan.FromSeconds(30)
+					Headers = { ContentType = MediaTypeHeaderValue.Parse(contentType) }
 				};
 
-				client.DefaultRequestHeaders.Accept.Clear();
-				client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-				StringContent content = new(message);
-				content.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
-				await client.PostAsync("https://lab.tagroot.io/Alert.ws", content);
+				await Client.PostAsync("https://lab.tagroot.io/Alert.ws", Content);
 			}
-			catch (Exception ex)
+			catch (Exception Ex)
 			{
-				Log.Critical(ex);
+				Log.Exception(ex);
 			}
 		}
 
-		/// <summary>
-		/// Sends the contents of the database to support.
-		/// </summary>
-		/// <param name="FileName">Name of file used to keep track of state changes.</param>
-		/// <param name="IncludeUnchanged">If unchanged material should be included.</param>
-		/// <param name="SendAsAlert">If an alert is to be sent.</param>
-		public static async Task EvaluateDatabaseDiff(string FileName, bool IncludeUnchanged, bool SendAsAlert)
+		public static async Task EvaluateDatabaseDiffAsync(string fileName, bool includeUnchanged, bool sendAsAlert)
 		{
 			StringBuilder Xml = new();
-
 			using XmlDatabaseExport Output = new(Xml, true, 256);
 			await ServiceRef.StorageService.Export(Output);
 
 			string AppDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-			FileName = Path.Combine(AppDataFolder, FileName);
+			fileName = Path.Combine(AppDataFolder, fileName);
 
 			string CurrentState = Xml.ToString();
-			string PrevState = File.Exists(FileName) ? File.ReadAllText(FileName) : string.Empty;
+			string PrevState = File.Exists(fileName) ? File.ReadAllText(fileName) : string.Empty;
 
 			EditScript<string> Script = Difference.AnalyzeRows(PrevState, CurrentState);
 			StringBuilder Markdown = new();
-			string Prefix;
-
-			Markdown.Append("Database content changes (`");
-			Markdown.Append(FileName);
-			Markdown.AppendLine("`):");
+			Markdown.AppendLine(CultureInfo.InvariantCulture, $"Database content changes (`{fileName}`):");
 
 			foreach (Step<string> Step in Script.Steps)
 			{
 				Markdown.AppendLine();
 
-				switch (Step.Operation)
+				string Prefix = Step.Operation switch
 				{
-					case EditOperation.Keep:
-					default:
-						if (!IncludeUnchanged)
-						{
-							continue;
-						}
+					EditOperation.Insert => "+>\t",
+					EditOperation.Delete => "->\t",
+					_ => includeUnchanged ? ">\t" : string.Empty
+				};
 
-						Prefix = ">\t";
-						break;
+				if (string.IsNullOrEmpty(Prefix))
+					continue;
 
-					case EditOperation.Insert:
-						Prefix = "+>\t";
-						break;
-
-					case EditOperation.Delete:
-						Prefix = "->\t";
-						break;
-				}
-
-				Markdown.Append(Prefix);
-				Markdown.AppendLine("```xml");
-
+				Markdown.AppendLine(CultureInfo.InvariantCulture, $"{Prefix}```xml");
 				foreach (string Row in Step.Symbols)
-				{
-					Markdown.Append(Prefix);
-					Markdown.Append(Row);
-					Markdown.AppendLine("  ");
-				}
-
-				Markdown.Append(Prefix);
-				Markdown.AppendLine("```");
+					Markdown.AppendLine(CultureInfo.InvariantCulture, $"{Prefix}{Row}  ");
+				Markdown.AppendLine(CultureInfo.InvariantCulture, $"{Prefix}```");
 			}
 
 			string DiffMsg = Markdown.ToString();
 
-			if (SendAsAlert)
+			if (sendAsAlert)
 			{
-				await SendAlert(DiffMsg, "text/markdown");
+				await SendAlertAsync(DiffMsg, "text/markdown");
 			}
 
-			File.WriteAllText(FileName, CurrentState);
-			File.WriteAllText(FileName + ".diff.md", DiffMsg);
+			File.WriteAllText(fileName, CurrentState);
+			File.WriteAllText(fileName + ".diff.md", DiffMsg);
 		}
 
 		#endregion
 
-		/// <summary>
-		/// Opens an URL in the application.
-		/// </summary>
-		/// <param name="Url">URL</param>
-		/// <returns>If URL is processed or not.</returns>
-		public static void OpenUrlSync(string Url)
+		#region URL Handling
+
+		public static void OpenUrlSync(string url)
 		{
 			MainThread.BeginInvokeOnMainThread(async () =>
 			{
 				if (ServiceRef.TagProfile.Step != RegistrationStep.Complete)
 				{
-					await ServiceRef.UiService.DisplayAlert(ServiceRef.Localizer[nameof(AppResources.SomethingWentWrong)], ServiceRef.Localizer[nameof(AppResources.NotCompletedOnboardingError)]);
+					await ServiceRef.UiService.DisplayAlert(
+						ServiceRef.Localizer[nameof(AppResources.SomethingWentWrong)],
+						ServiceRef.Localizer[nameof(AppResources.NotCompletedOnboardingError)]);
 					return;
 				}
 
-				await QrCode.OpenUrl(Url);
+				await QrCode.OpenUrl(url);
 			});
 		}
 
-		/// <summary>
-		/// Opens an URL in the application.
-		/// </summary>
-		/// <param name="Url">URL</param>
-		/// <returns>If URL is processed or not.</returns>
-		public static Task<bool> OpenUrlAsync(string Url)
+		public static Task<bool> OpenUrlAsync(string url) => OpenUrlAsync(url, showErrorIfUnable: true);
+
+		public static Task<bool> OpenUrlAsync(string url, bool showErrorIfUnable)
 		{
-			return OpenUrlAsync(Url, true);
+			return QrCode.OpenUrl(url, showErrorIfUnable);
 		}
 
-		/// <summary>
-		/// Opens an URL in the application.
-		/// </summary>
-		/// <param name="Url">URL</param>
-		/// <param name="ShowErrorIfUnable">If an error message should be displayed, in case the URI could not be opened.</param>
-		/// <returns>If URL is processed or not.</returns>
-		public static Task<bool> OpenUrlAsync(string Url, bool ShowErrorIfUnable)
-		{
-			return QrCode.OpenUrl(Url, ShowErrorIfUnable);
-		}
+		#endregion
 
-		/// <summary>
-		/// Asks the user to input its password. Password is verified before being returned.
-		/// </summary>
-		/// <param name="Purpose">Purpose for requesting the user to authenticate itself.</param>
-		/// <returns>Password, if the user has provided the correct password. Empty string, if password is not configured,
-		/// null if operation is cancelled.</returns>
-		public static async Task<string?> InputPassword(AuthenticationPurpose Purpose)
+		#region Authentication
+
+		public static async Task<string?> InputPasswordAsync(AuthenticationPurpose purpose)
 		{
 			ITagProfile Profile = ServiceRef.TagProfile;
 			if (!Profile.HasLocalPassword)
 				return string.Empty;
 
-			return await InputPassword(Purpose, Profile);
+			return await InputPasswordInternalAsync(purpose, Profile);
 		}
 
-		private static async Task<string?> InputPassword(AuthenticationPurpose Purpose, ITagProfile Profile)
+		private static async Task<string?> InputPasswordInternalAsync(AuthenticationPurpose purpose, ITagProfile profile)
 		{
 			displayedPasswordPopup = true;
 			try
 			{
-				if (!Profile.HasLocalPassword)
+				if (!profile.HasLocalPassword)
 					return string.Empty;
 
-				// TODO: Display localized purpose string.
-				CheckPasswordViewModel ViewModel = new(Purpose);
-
-				string? result = await ServiceRef.UiService.PushAsync<CheckPasswordPopup, CheckPasswordViewModel, string>(ViewModel);
-				await CheckUserBlocking();
-				return result;
+				CheckPasswordViewModel ViewModel = new(purpose);
+				string? Result = await ServiceRef.UiService.PushAsync<CheckPasswordPopup, CheckPasswordViewModel, string>(ViewModel);
+				await CheckUserBlockingAsync();
+				return Result;
 			}
-			catch (Exception)
+			catch
 			{
 				return null;
 			}
@@ -993,33 +874,23 @@ namespace NeuroAccessMaui
 			}
 		}
 
-		/// <summary>
-		/// Authenticates the user using the configured authentication method.
-		/// </summary>
-		/// <param name="Purpose">Purpose for requesting the user to authenticate itself.</param>
-		/// <param name="Force">If authentication is strictly required.</param>
-		/// <returns>If the user has been successfully authenticated.</returns>
-		public static Task<bool> AuthenticateUser(AuthenticationPurpose Purpose, bool Force = false)
+		public static Task<bool> AuthenticateUserAsync(AuthenticationPurpose purpose, bool force = false)
 		{
 			if (MainThread.IsMainThread)
-				return AuthenticateUserMainThread(Purpose, Force);
-			else
+				return AuthenticateUserOnMainThreadAsync(purpose, force);
+
+			TaskCompletionSource<bool> Tcs = new();
+			MainThread.BeginInvokeOnMainThread(async () =>
 			{
-				TaskCompletionSource<bool> Result = new();
-
-				MainThread.BeginInvokeOnMainThread(async () =>
-				{
-					Result.TrySetResult(await AuthenticateUserMainThread(Purpose, Force));
-				});
-
-				return Result.Task;
-			}
+				Tcs.TrySetResult(await AuthenticateUserOnMainThreadAsync(purpose, force));
+			});
+			return Tcs.Task;
 		}
 
-		private static async Task<bool> AuthenticateUserMainThread(AuthenticationPurpose Purpose, bool Force = false)
+		private static async Task<bool> AuthenticateUserOnMainThreadAsync(AuthenticationPurpose purpose, bool force = false)
 		{
 			bool NeedToVerifyPassword = IsInactivitySafeIntervalPassed();
-			if (!Force && !NeedToVerifyPassword)
+			if (!force && !NeedToVerifyPassword)
 				return true;
 
 			switch (ServiceRef.TagProfile.AuthenticationMethod)
@@ -1029,16 +900,17 @@ namespace NeuroAccessMaui
 						ServiceRef.TagProfile.AuthenticationMethod = AuthenticationMethod.Password;
 
 					if (await ServiceRef.PlatformSpecific.AuthenticateUserFingerprint(
-							 ServiceRef.Localizer[nameof(AppResources.FingerprintTitle)],
-							 null,
-							 ServiceRef.Localizer[nameof(AppResources.FingerprintDescription)],
-							 ServiceRef.Localizer[nameof(AppResources.Cancel)],
-							 null))
+						ServiceRef.Localizer[nameof(AppResources.FingerprintTitle)],
+						null,
+						ServiceRef.Localizer[nameof(AppResources.FingerprintDescription)],
+						ServiceRef.Localizer[nameof(AppResources.Cancel)],
+						null))
 					{
-						await UserAuthenticationSuccessful();
+						await UserAuthenticationSuccessfulAsync();
 						return true;
 					}
 					goto case AuthenticationMethod.Password;
+
 				case AuthenticationMethod.Password:
 					if (!ServiceRef.TagProfile.HasLocalPassword)
 						return true;
@@ -1046,35 +918,31 @@ namespace NeuroAccessMaui
 					if (displayedPasswordPopup)
 						return false;
 
-					return await InputPassword(Purpose, ServiceRef.TagProfile) is not null;
+					return await InputPasswordInternalAsync(purpose, ServiceRef.TagProfile) is not null;
+
 				default:
 					return false;
 			}
 		}
 
-		/// <summary>
-		/// Verify if the user is blocked and show an alert
-		/// </summary>
-		public static async Task CheckUserBlocking()
+		public static async Task CheckUserBlockingAsync()
 		{
-			DateTime? DateTimeForLogin = await appInstance!.loginAuditor.GetEarliestLoginOpportunity(Constants.Password.RemoteEndpoint, Constants.Password.Protocol);
-
-			if (DateTimeForLogin.HasValue)
+			DateTime? NextLoginTime = await appInstance!.loginAuditor.GetEarliestLoginOpportunity(Constants.Password.RemoteEndpoint, Constants.Password.Protocol);
+			if (NextLoginTime.HasValue)
 			{
 				IUiService Ui = ServiceRef.UiService;
 				string MessageAlert;
-
-				if (DateTimeForLogin == DateTime.MaxValue)
+				if (NextLoginTime == DateTime.MaxValue)
 					MessageAlert = ServiceRef.Localizer[nameof(AppResources.PasswordIsInvalidAplicationBlockedForever)];
 				else
 				{
-					DateTime LocalDateTime = DateTimeForLogin.Value.ToLocalTime();
-					if (DateTimeForLogin.Value.ToShortDateString() == DateTime.Today.ToShortDateString())
+					DateTime LocalDateTime = NextLoginTime.Value.ToLocalTime();
+					if (NextLoginTime.Value.ToShortDateString() == DateTime.Today.ToShortDateString())
 					{
 						string DateString = LocalDateTime.ToShortTimeString();
 						MessageAlert = ServiceRef.Localizer[nameof(AppResources.PasswordIsInvalidAplicationBlocked), DateString];
 					}
-					else if (DateTimeForLogin.Value.ToShortDateString() == DateTime.Today.AddDays(1).ToShortDateString())
+					else if (NextLoginTime.Value.ToShortDateString() == DateTime.Today.AddDays(1).ToShortDateString())
 					{
 						string DateString = LocalDateTime.ToShortTimeString();
 						MessageAlert = ServiceRef.Localizer[nameof(AppResources.PasswordIsInvalidAplicationBlockedTillTomorrow), DateString];
@@ -1087,109 +955,104 @@ namespace NeuroAccessMaui
 				}
 
 				await Ui.DisplayAlert(ServiceRef.Localizer[nameof(AppResources.ErrorTitle)], MessageAlert);
-				await Stop();
+				await StopAsync();
 			}
 		}
 
-		/// <summary>
-		/// Check the Password and reset the blocking counters if it matches
-		/// </summary>
-		/// <param name="Password">Password to check.</param>
-		public static async Task<bool> CheckPasswordAndUnblockUser(string Password)
+		public static async Task<bool> CheckPasswordAndUnblockUserAsync(string password)
 		{
-			if (Password is null)
+			if (password is null)
 				return false;
 
-			if (ServiceRef.TagProfile.ComputePasswordHash(Password) == ServiceRef.TagProfile.LocalPasswordHash)
+			if (ServiceRef.TagProfile.ComputePasswordHash(password) == ServiceRef.TagProfile.LocalPasswordHash)
 			{
-				await UserAuthenticationSuccessful();
+				await UserAuthenticationSuccessfulAsync();
 				return true;
 			}
 			else
 			{
-				await UserAuthenticationFailed();
+				await UserAuthenticationFailedAsync();
 				return false;
 			}
 		}
 
-		private static async Task UserAuthenticationSuccessful()
+		private static async Task UserAuthenticationSuccessfulAsync()
 		{
 			SetStartInactivityTime();
 			SetCurrentPasswordCounter(0);
 			await appInstance!.loginAuditor.UnblockAndReset(Constants.Password.RemoteEndpoint);
 		}
 
-		private static async Task UserAuthenticationFailed()
+		private static async Task UserAuthenticationFailedAsync()
 		{
-			await appInstance!.loginAuditor.ProcessLoginFailure(Constants.Password.RemoteEndpoint,
-				Constants.Password.Protocol, DateTime.Now, Constants.Password.Reason);
-
-			long PasswordAttemptCounter = await GetCurrentPasswordCounter();
-
-			PasswordAttemptCounter++;
-			SetCurrentPasswordCounter(PasswordAttemptCounter);
+			await appInstance!.loginAuditor.ProcessLoginFailure(Constants.Password.RemoteEndpoint, Constants.Password.Protocol, DateTime.Now, Constants.Password.Reason);
+			long CurrentCounter = await GetCurrentPasswordCounterAsync();
+			CurrentCounter++;
+			SetCurrentPasswordCounter(CurrentCounter);
 		}
 
-		/// <summary>
-		/// Set start time of inactivity
-		/// </summary>
-		private static void SetStartInactivityTime()
-		{
-			savedStartTime = DateTime.Now;
-		}
+		private static void SetStartInactivityTime() => savedStartTime = DateTime.Now;
 
-		/// <summary>
-		/// Performs a check whether 5 minutes of inactivity interval has been passed
-		/// </summary>
-		/// <returns>True if 5 minutes has been passed and False if has not been passed</returns>
-		private static bool IsInactivitySafeIntervalPassed()
-		{
-			return DateTime.Now.Subtract(savedStartTime).TotalMinutes > Constants.Password.PossibleInactivityInMinutes;
-		}
+		private static bool IsInactivitySafeIntervalPassed() => DateTime.Now.Subtract(savedStartTime).TotalMinutes > Constants.Password.PossibleInactivityInMinutes;
 
-		/// <summary>
-		/// Obtains the value for CurrentPasswordCounter
-		/// </summary>
-		internal static async Task<long> GetCurrentPasswordCounter()
-		{
-			return await ServiceRef.SettingsService.RestoreLongState(Constants.Password.CurrentPasswordAttemptCounter);
-		}
+		internal static async Task<long> GetCurrentPasswordCounterAsync() => await ServiceRef.SettingsService.RestoreLongState(Constants.Password.CurrentPasswordAttemptCounter);
 
-		/// <summary>
-		/// Saves that the value for CurrentPasswordCounter
-		/// </summary>
-		private static async void SetCurrentPasswordCounter(long CurrentPasswordAttemptCounter)
-		{
-			await ServiceRef.SettingsService.SaveState(Constants.Password.CurrentPasswordAttemptCounter, CurrentPasswordAttemptCounter);
-		}
+		private static async void SetCurrentPasswordCounter(long counter) => await ServiceRef.SettingsService.SaveState(Constants.Password.CurrentPasswordAttemptCounter, counter);
 
-		/// <summary>
-		/// <see cref="IDisposable.Dispose"/>
-		/// </summary>
+		#endregion
+
+		#region IDisposable Implementation
+
 		public void Dispose()
 		{
-			this.Dispose(true);
+			this.Dispose(disposing: true);
 			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>
-		/// <see cref="IDisposable.Dispose"/>
+		/// <see cref="IDisposableAsync.Dispose"/>
 		/// </summary>
 		protected virtual void Dispose(bool disposing)
+		{
+			if (disposing)
+				this.DisposeAsync().Wait();
+		}
+
+		/// <summary>
+		/// <see cref="IDisposableAsync.Dispose"/>
+		/// </summary>
+		public virtual async Task DisposeAsync()
 		{
 			if (this.isDisposed)
 				return;
 
-			if (disposing)
-			{
-				this.loginAuditor.Dispose();
-				this.autoSaveTimer?.Dispose();
-				this.initCompleted.Dispose();
-				this.startupWorker.Dispose();
-				this.startupCancellation.Dispose();
-			}
+			await this.loginAuditor.DisposeAsync();
+			this.autoSaveTimer?.Dispose();
+			this.initCompleted.Dispose();
+			this.startupWorker.Dispose();
+			this.startupCancellation.Dispose();
 
 			this.isDisposed = true;
 		}
+
+		#endregion
+
+		#region Helpers
+
+		public static T Instantiate<T>()
+		{
+			if (!defaultInstantiated)
+				defaultInstantiated = defaultInstantiatedSource.Task.Result;
+
+			return Types.Instantiate<T>(false);
+		}
+
+		public static void RaiseAppActivated()
+		{
+			AppActivated?.Invoke(Current, EventArgs.Empty);
+		}
+
+
+		#endregion
 	}
 }

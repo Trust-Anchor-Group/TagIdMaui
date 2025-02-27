@@ -88,7 +88,7 @@ namespace NeuroAccessMaui.Services.Nfc
 								{
 									if (!string.IsNullOrEmpty(Constants.UriSchemes.GetScheme(UriRecord.Uri)))
 									{
-										if (!await App.AuthenticateUser(AuthenticationPurpose.NfcTagDetected))
+										if (!await App.AuthenticateUserAsync(AuthenticationPurpose.NfcTagDetected))
 											return;
 
 										if (await App.OpenUrlAsync(UriRecord.Uri))
@@ -193,7 +193,7 @@ namespace NeuroAccessMaui.Services.Nfc
 				if (LinkableView.HasMedia)
 					Items.Add(new KeyValuePair<byte[], string>(LinkableView.Media!, LinkableView.MediaContentType!));
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.NfcTagDetected))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.NfcTagDetected))
 					return false;
 
 				bool Ok = await Callback([.. Items]);

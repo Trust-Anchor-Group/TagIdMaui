@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Waher.Events;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Runtime.Inventory;
 using Waher.Security;
@@ -1115,7 +1116,7 @@ namespace NeuroAccessMaui.Services.Tag
 
 			try
 			{
-				this.OnPropertiesChanged?.Invoke(this, EventArgs.Empty);
+				this.OnPropertiesChanged.Raise(this, EventArgs.Empty);
 			}
 			catch (Exception ex)
 			{

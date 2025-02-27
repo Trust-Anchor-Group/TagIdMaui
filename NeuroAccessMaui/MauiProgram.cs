@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Markup;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls.Handlers.Items;
 using Microsoft.Maui.Handlers;
+using Microsoft.Maui.LifecycleEvents;
 using Mopups.Hosting;
 using NeuroAccessMaui.UI;
 using NeuroAccessMaui.Resources.Languages;
@@ -12,6 +13,10 @@ using ZXing.Net.Maui.Controls;
 using Microsoft.Maui.Platform;
 #if DEBUG
 using DotNet.Meteor.HotReload.Plugin;
+using SkiaSharp.Views.Maui.Controls.Hosting;
+using SkiaSharp.Views.Maui.Controls;
+
+
 #endif
 
 
@@ -32,6 +37,27 @@ namespace NeuroAccessMaui
 			MauiAppBuilder Builder = MauiApp.CreateBuilder();
 
 			Builder.UseMauiApp<App>();
+
+			Builder.ConfigureLifecycleEvents(lifecycle =>
+			{
+#if ANDROID
+				lifecycle.AddAndroid(android =>
+					android.OnResume(activity =>
+					{
+						// App has resumed on Android
+						App.RaiseAppActivated();
+					}));
+#elif IOS
+				lifecycle.AddiOS(ios =>
+                ios.OnActivated(app =>
+                {
+                    // App has resumed on iOS
+                    App.RaiseAppActivated();
+                }));
+#endif
+			});
+
+			Builder.UseSkiaSharp();
 #if DEBUG
 			Builder.EnableHotReload();
 #endif

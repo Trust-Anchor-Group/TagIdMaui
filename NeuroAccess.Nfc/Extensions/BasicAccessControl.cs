@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Waher.Content;
+using Waher.Runtime.IO;
 using Waher.Security;
 
 namespace NeuroAccess.Nfc.Extensions
@@ -177,7 +178,7 @@ namespace NeuroAccess.Nfc.Extensions
 		/// <param name="Info">Document Information</param>
 		public static byte[] KSeed(this DocumentInformation Info)
 		{
-			byte[] Data = CommonTypes.ISO_8859_1.GetBytes(Info.MRZ_Information);
+			byte[] Data = InternetContent.ISO_8859_1.GetBytes(Info.MRZ_Information);
 			byte[] H = Hashes.ComputeSHA1Hash(Data);
 			Array.Resize<byte>(ref H, 16);
 			return H;

@@ -1,6 +1,7 @@
 ﻿using NeuroAccessMaui.Extensions;
 using NeuroAccessMaui.Services;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using System.Text;
 using System.Text.RegularExpressions;
 using Waher.Content;
@@ -11,22 +12,15 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.MachineReport.Reports
 	/// <summary>
 	/// Abstract base class for token reports.
 	/// </summary>
-	public abstract partial class TokenReport : IDisposable
+	/// <param name="TokenId">ID of token being viewed.</param>
+	public abstract partial class TokenReport(string TokenId)
+		: IDisposable
 	{
 		private readonly List<string> temporaryFiles = [];
-		private readonly string tokenId;
+		private readonly string tokenId = TokenId;
 		private MachineReportViewModel? view;
 		private Timer? timer;
 		private bool isDisposed;
-
-		/// <summary>
-		/// Abstract base class for token reports.
-		/// </summary>
-		/// <param name="TokenId">ID of token being viewed.</param>
-		public TokenReport(string TokenId)
-		{
-			this.tokenId = TokenId;
-		}
 
 		/// <summary>
 		/// Token ID associated with the state-machine.

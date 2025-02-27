@@ -3,6 +3,7 @@ using NeuroAccessMaui.Resources.Languages;
 using NeuroAccessMaui.Services.Contacts;
 using NeuroAccessMaui.UI.Pages.Identity.ViewIdentity;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 
 namespace NeuroAccessMaui.Services.Notification.Identities
 {

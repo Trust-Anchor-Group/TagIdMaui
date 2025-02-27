@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using NeuroAccessMaui.UI.Controls;
 using NeuroAccessMaui.UI.Pages;
 using NeuroAccessMaui.UI.Pages.Applications.Applications;
 using NeuroAccessMaui.UI.Pages.Applications.ApplyId;
@@ -33,6 +34,7 @@ using NeuroAccessMaui.UI.Pages.Things.MyThings;
 using NeuroAccessMaui.UI.Pages.Things.ReadSensor;
 using NeuroAccessMaui.UI.Pages.Things.ViewClaimThing;
 using NeuroAccessMaui.UI.Pages.Things.ViewThing;
+using NeuroAccessMaui.UI.Pages.Utility.Images;
 using NeuroAccessMaui.UI.Pages.Wallet;
 using NeuroAccessMaui.UI.Pages.Wallet.AccountEvent;
 using NeuroAccessMaui.UI.Pages.Wallet.BuyEDaler;
@@ -171,6 +173,9 @@ namespace NeuroAccessMaui.UI
 			Builder.Services.AddTransient<ReportTypePopup, ReportTypeViewModel>();
 			Builder.Services.AddTransient<SubscribeToPopup, SubscribeToViewModel>();
 			Builder.Services.AddTransient<SubscriptionRequestPopup, SubscriptionRequestViewModel>();
+
+			//Utility
+			Builder.Services.AddTransient<ImageCropperView, ImageCroppingViewModel>();
 
 			return Builder;
 		}

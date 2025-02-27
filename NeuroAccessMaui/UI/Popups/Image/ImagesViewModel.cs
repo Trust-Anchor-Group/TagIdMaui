@@ -45,9 +45,10 @@ namespace NeuroAccessMaui.UI.Popups.Image
 			});
 		}
 
-		public override void OnPop()
+		public override Task OnPop()
 		{
 			this.photosLoader.CancelLoadPhotos();
+			return base.OnPop();
 		}
 		/// <summary>
 		/// Cancels

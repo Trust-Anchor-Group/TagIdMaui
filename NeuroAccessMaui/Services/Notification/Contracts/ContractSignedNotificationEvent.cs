@@ -8,6 +8,7 @@ using NeuroAccessMaui.UI.Pages.Contracts.ViewContract;
 using System.Text;
 using System.Xml;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 
 namespace NeuroAccessMaui.Services.Notification.Contracts
 {

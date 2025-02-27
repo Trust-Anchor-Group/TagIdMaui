@@ -1,54 +1,54 @@
-using CommunityToolkit.Mvvm.Input;
-using NeuroAccessMaui.Services;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Maui.Devices;
 using NeuroAccessMaui.Services.Localization;
-using System.Globalization;
+using NeuroAccessMaui.UI.Popups;
+using NeuroAccessMaui.UI.Popups.Settings;
+
 namespace NeuroAccessMaui.UI.Popups.Settings
 {
-	public partial class SelectLanguagePopup
+	public partial class SelectLanguagePopup : BasePopup
 	{
-		public override double ViewWidthRequest => (DeviceDisplay.MainDisplayInfo.Width / DeviceDisplay.MainDisplayInfo.Density) * (3.0 / 4.0);
-		public List<LanguageInfo> Languages { get; } = new(App.SupportedLanguages);
 
 		public SelectLanguagePopup()
 		{
 			this.InitializeComponent();
 
-			this.BindingContext = this;
-			this.SelectLanguage(App.SelectedLanguage.Name);
+			// Set the BindingContext to the dedicated view model.
+			this.BindingContext = new SelectLanguagePopupViewModel();
 
+			WeakReferenceMessenger.Default.Register<ScrollToLanguageMessage>(this, (r, m) =>
+			{
+				// Find the visual element corresponding to the language name.
+				foreach (object Item in this.LanguagesContainer)
+				{
+					if (Item is not VisualElement { BindingContext: LanguageInfo Lang } Element)
+						continue;
+					if (Lang.Name != m.Value)
+						continue;
+
+					// Scroll to the element.
+					MainThread.BeginInvokeOnMainThread(async void () =>
+					{
+						try
+						{
+							Console.WriteLine("TESTETESTT");
+							await this.InnerScrollView.ScrollToAsync(Element, ScrollToPosition.MakeVisible, true);
+						}
+						catch (Exception e)
+						{
+							return; // Ignore, not muy importante.
+						}
+					});
+					break;
+				}
+			});
 		}
 
-		[RelayCommand]
-		public void SelectLanguage(object Option)
+		protected override void OnDisappearing()
 		{
-			if (Option is not string Name)
-				return;
-
-			LanguageInfo? SelectedLanguage = null;
-
-			foreach (object Item in this.LanguagesContainer)
-			{
-				if ((Item is VisualElement Element) &&
-					(Element.BindingContext is LanguageInfo LanguageInfo))
-				{
-					if (Name == LanguageInfo.Name)
-					{
-						VisualStateManager.GoToState(Element, VisualStateManager.CommonStates.Selected);
-						SelectedLanguage = LanguageInfo;
-
-						Task ExecutionTask = this.Dispatcher.DispatchAsync(() => this.InnerScrollView.ScrollToAsync(Element, ScrollToPosition.MakeVisible, true));
-					}
-					else
-						VisualStateManager.GoToState(Element, VisualStateManager.CommonStates.Normal);
-				}
-			}
-
-			if ((SelectedLanguage is not null) && (Name != CultureInfo.CurrentCulture.Name))
-			{
-				Preferences.Set("user_selected_language", SelectedLanguage.TwoLetterISOLanguageName);
-				LocalizationManager.Current.CurrentCulture = SelectedLanguage;
-			}
-			ServiceRef.UiService.PopAsync();
+			base.OnDisappearing();
+			// Unregister the message handler to avoid multiple registrations.
+			WeakReferenceMessenger.Default.Unregister<ScrollToLanguageMessage>(this);
 		}
 	}
 }

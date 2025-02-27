@@ -1,5 +1,6 @@
 ﻿using NeuroAccessMaui.UI.Controls.Extended;
 using NeuroAccessMaui.UI.Converters;
+using Waher.Events;
 
 namespace NeuroAccessMaui.UI.Controls
 {
@@ -208,7 +209,7 @@ namespace NeuroAccessMaui.UI.Controls
 			CompositeDatePicker Picker = (CompositeDatePicker)bindable;
 			EventHandler<NullableDateChangedEventArgs>? selected = Picker.NullableDateSelected;
 
-			selected?.Invoke(Picker, new NullableDateChangedEventArgs((DateTime?)oldValue, (DateTime?)newValue));
+			selected.Raise(Picker, new NullableDateChangedEventArgs((DateTime?)oldValue, (DateTime?)newValue));
 		}
 
 		private bool isDefaultDateSet = false;

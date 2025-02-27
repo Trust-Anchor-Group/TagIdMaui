@@ -127,15 +127,19 @@ namespace NeuroAccessMaui.AndroidPlatform.Nfc
 					Records.Add(NdefRecord.CreateTextRecord(null, s) ?? throw new ArgumentException("Unable to create text record.", nameof(Items)));
 				else
 				{
-					if (Item is not KeyValuePair<byte[], string> Mime)
+					if (Item is KeyValuePair<byte[], string> Mime)
+						Records.Add(NdefRecord.CreateMime(Mime.Value, Mime.Key) ?? throw new ArgumentException("Unable to create MIME record.", nameof(Items)));
+					else
 					{
 						if (!InternetContent.Encodes(Item, out Grade _, out IContentEncoder Encoder))
 							throw new ArgumentException("Unable to encode objects of type " + Item.GetType().FullName + ".", nameof(Items));
 
-						Mime = await Encoder.EncodeAsync(Item, Encoding.UTF8);
-					}
+						ContentResponse Encoded = await Encoder.EncodeAsync(Item, Encoding.UTF8, null);
+						Encoded.AssertOk();
 
-					Records.Add(NdefRecord.CreateMime(Mime.Value, Mime.Key) ?? throw new ArgumentException("Unable to create MIME record.", nameof(Items)));
+						Records.Add(NdefRecord.CreateMime(Encoded.ContentType, Encoded.Encoded)
+							?? throw new ArgumentException("Unable to create MIME record.", nameof(Items)));
+					}
 				}
 			}
 

@@ -3,6 +3,7 @@ using NeuroAccessMaui.Services.Contacts;
 using NeuroAccessMaui.UI.Pages.Things.CanRead;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Provisioning;
+using Waher.Networking.XMPP.Provisioning.Events;
 using Waher.Networking.XMPP.Sensor;
 using Waher.Persistence;
 using Waher.Things;
@@ -104,7 +105,7 @@ namespace NeuroAccessMaui.Services.Notification.Things
 					return null;
 
 				SortedDictionary<string, bool> Fields = [];
-				SensorDataClientRequest Request = ServiceRef.XmppService.RequestSensorReadout(Item.LastPresenceFullJid, [ Thing ], FieldType.All);
+				SensorDataClientRequest Request = await ServiceRef.XmppService.RequestSensorReadout(Item.LastPresenceFullJid, [ Thing ], FieldType.All);
 				TaskCompletionSource<bool> Done = new();
 
 				Request.OnFieldsReceived += (sender, NewFields) =>

@@ -3,6 +3,7 @@ using NeuroAccessMaui.Resources.Languages;
 using NeuroFeatures;
 using System.Text;
 using Waher.Content;
+using Waher.Events;
 using Waher.Networking.XMPP;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Networking.XMPP.Provisioning;
@@ -42,22 +43,14 @@ namespace NeuroAccessMaui.Services.Push
 				}
 
 				await ServiceRef.XmppService.NewPushNotificationToken(TokenInformation);
-
-				try
-				{
-					this.OnNewToken?.Invoke(this, new TokenEventArgs(TokenInformation.Service, TokenInformation.Token, TokenInformation.ClientType));
-				}
-				catch (Exception ex)
-				{
-					ServiceRef.LogService.LogException(ex);
-				}
+				await this.OnNewToken.Raise(this, new TokenEventArgs(TokenInformation.Service, TokenInformation.Token, TokenInformation.ClientType));
 			}
 		}
 
 		/// <summary>
 		/// Event raised when a new token is made available.
 		/// </summary>
-		public event TokenEventHandler? OnNewToken;
+		public event EventHandlerAsync<TokenEventArgs>? OnNewToken;
 
 		/// <summary>
 		/// Tries to get a token from a push notification service.

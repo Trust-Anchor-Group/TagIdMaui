@@ -2499,4 +2499,22 @@
   <data name="GenerateQrCode" xml:space="preserve">
     <value>Generați cod QR</value>
   </data>
+  <data name="CameraPermissionTitle" xml:space="preserve">
+    <value>Aparat foto</value>
+  </data>
+  <data name="CameraPermissionDescription" xml:space="preserve">
+    <value>Pentru a utiliza această funcție, vă rugăm să activați accesul la cameră în setările dvs.</value>
+  </data>
+  <data name="CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Deschideți setările - Faceți clic pe "Permisiuni" - Activați permisiunile camerei</value>
+  </data>
+  <data name="iOS_CameraPermissionDescriptionSecondary" xml:space="preserve">
+    <value>Deschideți setările - Activați permisiunile camerei</value>
+  </data>
+  <data name="GoToSettings" xml:space="preserve">
+    <value>Deschideți setările</value>
+  </data>
+  <data name="Skip" xml:space="preserve">
+    <value>Sări peste</value>
+  </data>
 </root>

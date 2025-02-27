@@ -228,7 +228,7 @@ namespace NeuroAccessMaui.UI.Pages.Petitions.PetitionPeerReview
 
 		private async Task Accept(bool GoBackIfOk)
 		{
-			if (this.ContentToSign is null || !await App.AuthenticateUser(AuthenticationPurpose.AcceptPeerReview))
+			if (this.ContentToSign is null || !await App.AuthenticateUserAsync(AuthenticationPurpose.AcceptPeerReview))
 				return;
 
 			bool Succeeded = await ServiceRef.NetworkService.TryRequest(async () =>
@@ -256,7 +256,7 @@ namespace NeuroAccessMaui.UI.Pages.Petitions.PetitionPeerReview
 
 		private async Task Decline(bool GoBackIfOk)
 		{
-			if (this.ContentToSign is null || !await App.AuthenticateUser(AuthenticationPurpose.DeclinePeerReview))
+			if (this.ContentToSign is null || !await App.AuthenticateUserAsync(AuthenticationPurpose.DeclinePeerReview))
 				return;
 
 			bool Succeeded = await ServiceRef.NetworkService.TryRequest(async () =>
@@ -1176,7 +1176,7 @@ namespace NeuroAccessMaui.UI.Pages.Petitions.PetitionPeerReview
 		{
 			try
 			{
-				if (await App.AuthenticateUser(AuthenticationPurpose.AuthenticateReviewer, true))
+				if (await App.AuthenticateUserAsync(AuthenticationPurpose.AuthenticateReviewer, true))
 				{
 					await this.Accept(false);
 					this.NextPage();

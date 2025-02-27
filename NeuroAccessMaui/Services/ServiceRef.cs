@@ -12,6 +12,7 @@ using NeuroAccessMaui.Services.Localization;
 using NeuroAccessMaui.Services.Network;
 using NeuroAccessMaui.Services.Nfc;
 using NeuroAccessMaui.Services.Notification;
+using NeuroAccessMaui.Services.AppPermissions;
 using NeuroAccessMaui.Services.Push;
 using NeuroAccessMaui.Services.Settings;
 using NeuroAccessMaui.Services.Storage;
@@ -47,6 +48,7 @@ namespace NeuroAccessMaui.Services
 		private static IStringLocalizer? localizer;
 		private static IPlatformSpecific? platformSpecific;
 		private static IBarcodeReader? barcodeReader;
+		private static IPermissionService? permissionService;
 
 		/// <summary>
 		/// Service serializing and managing UI-related tasks.
@@ -225,6 +227,18 @@ namespace NeuroAccessMaui.Services
 			{
 				pushNotificationService ??= App.Instantiate<IPushNotificationService>();
 				return pushNotificationService;
+			}
+		}
+
+		/// <summary>
+		/// Permission Service
+		/// </summary>
+		public static IPermissionService PermissionService
+		{
+			get
+			{
+				permissionService ??= App.Instantiate<IPermissionService>();
+				return permissionService;
 			}
 		}
 

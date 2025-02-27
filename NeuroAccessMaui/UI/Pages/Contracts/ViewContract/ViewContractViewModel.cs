@@ -22,6 +22,7 @@ using System.Reflection;
 using System.Text;
 using Waher.Content;
 using Waher.Networking.XMPP.Contracts;
+using Waher.Networking.XMPP.Contracts.EventArguments;
 using Waher.Networking.XMPP.HttpFileUpload;
 using Waher.Script;
 
@@ -457,7 +458,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.ViewContract
 				if (!await AreYouSure(ServiceRef.Localizer[nameof(AppResources.AreYouSureYouWantToObsoleteContract)]))
 					return;
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.ObsoleteContract, true))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.ObsoleteContract, true))
 					return;
 
 				await ServiceRef.XmppService.ObsoleteContract(this.Contract.ContractId);
@@ -487,7 +488,7 @@ namespace NeuroAccessMaui.UI.Pages.Contracts.ViewContract
 				if (!await AreYouSure(ServiceRef.Localizer[nameof(AppResources.AreYouSureYouWantToDeleteContract)]))
 					return;
 
-				if (!await App.AuthenticateUser(AuthenticationPurpose.DeleteContract, true))
+				if (!await App.AuthenticateUserAsync(AuthenticationPurpose.DeleteContract, true))
 					return;
 
 				await ServiceRef.XmppService.DeleteContract(this.Contract.ContractId);

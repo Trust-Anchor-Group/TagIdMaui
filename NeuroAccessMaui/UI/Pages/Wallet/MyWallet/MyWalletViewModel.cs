@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EDaler;
+using EDaler.Events;
 using EDaler.Uris;
 using Microsoft.Maui.Controls.Shapes;
 using NeuroAccessMaui.Resources.Languages;
@@ -21,6 +22,7 @@ using NeuroAccessMaui.UI.Pages.Wallet.RequestPayment;
 using NeuroAccessMaui.UI.Pages.Wallet.SellEDaler;
 using NeuroAccessMaui.UI.Pages.Wallet.ServiceProviders;
 using NeuroFeatures;
+using NeuroFeatures.EventArguments;
 using System.Xml;
 using Waher.Networking.XMPP.Contracts;
 using Waher.Persistence;
@@ -975,7 +977,7 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.MyWallet
 			return Task.CompletedTask;
 		}
 
-		private void NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
+		private Task NotificationService_OnNewNotification(object? Sender, NotificationEventArgs e)
 		{
 			if (e.Event.Type == NotificationEventType.Wallet)
 			{
@@ -987,6 +989,8 @@ namespace NeuroAccessMaui.UI.Pages.Wallet.MyWallet
 						this.NrTokenNotifications++;
 				});
 			}
+
+			return Task.CompletedTask;
 		}
 
 	}

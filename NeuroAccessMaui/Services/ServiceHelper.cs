@@ -17,7 +17,7 @@ namespace NeuroAccessMaui.Services
 			{
 #if DEBUG
 				ex = Log.UnnestException(ex);
-				App.SendAlert(ex.Message, "text/plain").Wait();
+				App.SendAlertAsync(ex.Message, "text/plain").Wait();
 #endif
 				throw new ArgumentException("Service not found: " + typeof(T).FullName);
 			}

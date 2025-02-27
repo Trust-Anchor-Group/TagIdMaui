@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<base:BasePopup x:Class="NeuroAccessMaui.UI.Popups.Permission.ShowPermissionPopup"
+							x:DataType="viewmodel:ShowPermissionViewModel"
+							xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+							xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+							xmlns:l="clr-namespace:NeuroAccessMaui.Services.Localization"
+							xmlns:controls="clr-namespace:NeuroAccessMaui.UI.Controls"
+							xmlns:ui="clr-namespace:NeuroAccessMaui.UI"
+							xmlns:base="clr-namespace:NeuroAccessMaui.UI.Popups"
+							xmlns:viewmodel="clr-namespace:NeuroAccessMaui.UI.Popups.Permission"
+							xmlns:animations="clr-namespace:Mopups.Animations;assembly=Mopups"
+							xmlns:mopups="clr-namespace:Mopups.Pages;assembly=Mopups">
+
+	<mopups:PopupPage.Animation>
+		<animations:ScaleAnimation DurationIn="500" DurationOut="500" EasingIn="CubicIn" EasingOut="CubicOut" HasBackgroundAnimation="True"
+											PositionIn="Center" PositionOut="Center" />
+	</mopups:PopupPage.Animation>
+
+	<Grid
+		Style="{StaticResource PopupGrid}">
+
+		<Border
+			WidthRequest="{Binding ViewWidthRequest}"
+			MaximumHeightRequest="{Binding MaximumViewHeightRequest}"
+			Style="{StaticResource PopupBorder}">
+
+			<ScrollView
+				VerticalOptions="Center">
+				<VerticalStackLayout
+					Spacing="{StaticResource LargeSpacing}">
+
+					<VerticalStackLayout
+						Spacing="{StaticResource MediumSpacing}">
+
+						<Label
+							HorizontalTextAlignment="Center"
+							Style="{StaticResource PageTitleLabel}"
+							Text="{Binding Title}" />
+
+						<Frame
+							WidthRequest="{Binding CameraIconBackgroundSize}"
+							HeightRequest="{Binding CameraIconBackgroundSize}"
+							CornerRadius="{Binding CameraIconBackgroundCornerRadius}"
+							BackgroundColor="{AppThemeBinding Light={StaticResource Accent20Light}, Dark={StaticResource EnabledTransparentButtonBackgroundDark}}">
+							<Path
+								VerticalOptions="Center"
+								HorizontalOptions="Center"
+								HeightRequest="{Binding CameraIconSize}"
+								WidthRequest="{Binding CameraIconSize}"
+								Aspect="Uniform"
+								Data="{Binding IconGeometry}"
+								Fill="{AppThemeBinding Light={StaticResource AccentActiveLight}, Dark={StaticResource EnabledFilledButtonBackgroundDark}}" />
+						</Frame>
+
+						<Label
+							HorizontalTextAlignment="Start"
+							Style="{StaticResource ItemDescriptionLabel}"
+							Text="{Binding Description}"
+							FontSize="15"
+							Margin="{StaticResource SmallLeftRightMargins}"/>
+
+						<Label
+							HorizontalTextAlignment="Start"
+							Style="{StaticResource ItemDescriptionLabel}"
+							Text="{Binding DescriptionSecondary}"
+							FontSize="15"
+							Margin="{StaticResource SmallLeftRightMargins}"/>
+							  
+					</VerticalStackLayout>
+
+					<VerticalStackLayout Spacing="{StaticResource MediumSpacing}">
+						<controls:TextButton
+							Command="{Binding GoToSettingsCommand}"
+							LabelData="{l:Localize GoToSettings}"
+							Style="{StaticResource PrimaryButton}" />
+
+						<controls:TextButton
+							Command="{Binding CloseCommand}"
+							LabelData="{l:Localize Skip}"
+							Style="{StaticResource SecondaryButton}" />
+					</VerticalStackLayout>
+				</VerticalStackLayout>
+			</ScrollView>
+		</Border>
+	</Grid>
+</base:BasePopup>
