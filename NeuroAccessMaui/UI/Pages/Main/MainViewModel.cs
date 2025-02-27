@@ -55,9 +55,7 @@ namespace NeuroAccessMaui.UI.Pages.Main
 			}
 		}
 
-		public bool CanScanQrCode => this.IsConnected;
-
-		[RelayCommand(CanExecute = nameof(CanScanQrCode))]
+		[RelayCommand()]
 		private async Task ScanQrCode()
 		{
 			await Services.UI.QR.QrCode.ScanQrCodeAndHandleResult();
