@@ -2517,4 +2517,7 @@
   <data name="Skip" xml:space="preserve">
     <value>Skip</value>
   </data>
+  <data name="IdentityImages" xml:space="preserve">
+    <value>Identity Images</value>
+  </data>
 </root>

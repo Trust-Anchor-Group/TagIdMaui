@@ -20,7 +20,7 @@
 		<Border WidthRequest="{Binding ViewWidthRequest}" MaximumHeightRequest="{Binding MaximumViewHeightRequest}" Style="{StaticResource PopupBorder}">
 			<VerticalStackLayout Spacing="{StaticResource MediumSpacing}">
 				<Label
-						 Text="Identity Images"
+						 Text="{l:Localize IdentityImages}"
 						 Style="{StaticResource PageTitleLabel}"
 						 HorizontalTextAlignment="Center"/>
 					
