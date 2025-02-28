@@ -271,6 +271,7 @@
 						</Grid>
 					</VerticalStackLayout>
 				</Frame>
+					
 				<Frame Style="{StaticResource FrameSet}" IsVisible="{Binding IsThirdPartyAndNotForReview}">
 					<VerticalStackLayout Spacing="{StaticResource SmallSpacing}">
 						<controls:TextButton
@@ -287,18 +288,33 @@
 												IsEnabled="{Binding Path=IsBusy, Converter={StaticResource InvertedBoolConverter}}" />
 					</VerticalStackLayout>
 				</Frame>
+					
+			   <!-- QR and Photos Buttons -->
+				<Border Style="{StaticResource BottomBarBorder}">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
+							  
+						<!-- Share QR Button -->
+						<controls:TemplatedButton Command="{x:Binding OpenQrPopupCommand}" Grid.Column="0">
+							<Border Style="{StaticResource TransparentTemplateButtonBorder}">
+								<Label Style="{StaticResource TransparentTemplateButtonLabel}" Text="{l:Localize ShareQr}" HorizontalOptions="Center"/>
+							</Border>
+						</controls:TemplatedButton>
+							  
+						<!-- Show Photos Button -->
+						<controls:TemplatedButton Command="{x:Binding ImageTappedCommand}" Grid.Column="1">
+							<Border Style="{StaticResource TransparentTemplateButtonBorder}">
+								<Label Style="{StaticResource TransparentTemplateButtonLabel}" Text="{l:Localize ShowPhotos}" HorizontalOptions="Center"/>
+							</Border>
+						</controls:TemplatedButton>
+					</Grid>
+				</Border>	
 			</VerticalStackLayout>
 		</ScrollView>
 
-		<!-- Bottom Bar -->
-		<Border Grid.Row="1" Style="{StaticResource BottomBarBorder}" >
-			<!-- Share QR Button -->
-			<controls:TemplatedButton Command="{x:Binding OpenQrPopupCommand}">
-				<Border Style="{StaticResource TransparentTemplateButtonBorder}">
-					<Label Style="{StaticResource TransparentTemplateButtonLabel}" Text="Share QR" HorizontalOptions="Center"/>
-				</Border>
-			</controls:TemplatedButton>
-		</Border>
 	</Grid>
 		 
 </base:BaseContentPage>

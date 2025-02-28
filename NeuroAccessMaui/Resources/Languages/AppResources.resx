@@ -2520,4 +2520,10 @@
   <data name="CopyLink" xml:space="preserve">
     <value>Copy Link</value>
   </data>
+  <data name="ShareQr" xml:space="preserve">
+    <value>Share QR</value>
+  </data>
+  <data name="ShowPhotos" xml:space="preserve">
+    <value>Show All Photos</value>
+  </data>
 </root>
